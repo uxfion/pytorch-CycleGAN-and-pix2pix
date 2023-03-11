@@ -3,6 +3,7 @@ from data.base_dataset import BaseDataset, get_transform
 from data.image_folder import make_dataset
 from PIL import Image
 import random
+import torch
 
 
 class UnalignedDataset(BaseDataset):
@@ -58,6 +59,8 @@ class UnalignedDataset(BaseDataset):
         B_img = Image.open(B_path).convert('RGB')
         # apply image transformation
         A = self.transform_A(A_img)
+        d = torch.full((1, 512, 512), 20.0)  # 全为20的张量
+        A = torch.cat((A, d), dim=0)  # 在第0维上连接
         B = self.transform_B(B_img)
 
         return {'A': A, 'B': B, 'A_paths': A_path, 'B_paths': B_path}
