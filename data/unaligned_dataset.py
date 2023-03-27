@@ -59,9 +59,13 @@ class UnalignedDataset(BaseDataset):
         B_img = Image.open(B_path).convert('RGB')
         # apply image transformation
         A = self.transform_A(A_img)
-        d = torch.full((1, 512, 512), 20.0)  # 全为20的张量
-        A = torch.cat((A, d), dim=0)  # 在第0维上连接
+        A_ch4 = torch.full((1, 512, 512), 20.0)  # 全为20的张量
+        A_ext = torch.cat((A, A_ch4), dim=0)  # 在第0维上连接
+        A = A_ext
         B = self.transform_B(B_img)
+        B_ch4 = torch.full((1, 512, 512), 0.0)  # 全为20的张量
+        B_ext = torch.cat((B, B_ch4), dim=0)  # 在第0维上连接
+        B = B_ext
 
         return {'A': A, 'B': B, 'A_paths': A_path, 'B_paths': B_path}
 
