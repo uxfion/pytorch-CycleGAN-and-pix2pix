@@ -70,9 +70,13 @@ class MyCycleGANModel(BaseModel):
         # define networks (both Generators and discriminators)
         # The naming is different from those used in the paper.
         # Code (vs. paper): G_A (G), G_B (F), D_A (D_Y), D_B (D_X)
-        self.netG_A = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, opt.netG, opt.norm,
+        # self.netG_A = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf, opt.netG, opt.norm,
+        #                                 not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids)
+        # self.netG_B = networks.define_G(opt.output_nc, opt.input_nc, opt.ngf, opt.netG, opt.norm,
+        #                                 not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids)
+        self.netG_A = networks.define_G(4, 3, opt.ngf, opt.netG, opt.norm,
                                         not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids)
-        self.netG_B = networks.define_G(opt.output_nc, opt.input_nc, opt.ngf, opt.netG, opt.norm,
+        self.netG_B = networks.define_G(4, 3, opt.ngf, opt.netG, opt.norm,
                                         not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids)
 
         if self.isTrain:  # define discriminators
@@ -117,20 +121,27 @@ class MyCycleGANModel(BaseModel):
 
         self.real_B = input['B' if AtoB else 'A'].to(self.device)
 
-        self.real_B_ext = torch.cat((self.real_B, torch.full((self.real_B.shape[0], 1, 512, 512), 0.0).to(self.device)), dim=1)
+        self.real_B_ext = torch.cat((self.real_B, torch.full((self.real_B.shape[0], 1, 512, 512), 0.05).to(self.device)), dim=1)
         # print(self.real_B_ext.shape)
         # print(self.real_B_ext)
-
 
         self.image_paths = input['A_paths' if AtoB else 'B_paths']
 
 
     def forward(self):
         """Run forward pass; called by both functions <optimize_parameters> and <test>."""
-        self.fake_B = self.netG_A(self.real_A)  # G_A(A)
-        self.rec_A = self.netG_B(self.fake_B)   # G_B(G_A(A))
-        self.fake_A = self.netG_B(self.real_B)  # G_B(B)
-        self.rec_B = self.netG_A(self.fake_A)   # G_A(G_B(B))
+        # self.fake_B = self.netG_A(self.real_A)  # G_A(A)
+        # self.rec_A = self.netG_B(self.fake_B)   # G_B(G_A(A))
+        # self.fake_A = self.netG_B(self.real_B)  # G_B(B)
+        # self.rec_B = self.netG_A(self.fake_A)   # G_A(G_B(B))
+
+        self.fake_B = self.netG_A(self.real_A_ext)
+        self.fake_B_ext = torch.cat((self.fake_B, torch.full((self.fake_B.shape[0], 1, 512, 512), 0.05).to(self.device)), dim=1)
+        self.rec_A = self.netG_B(self.fake_B_ext)
+
+        self.fake_A = self.netG_B(self.real_B_ext)
+        self.fake_A_ext = torch.cat((self.fake_A, torch.full((self.fake_A.shape[0], 1, 512, 512), 20.0).to(self.device)), dim=1)
+        self.rec_B = self.netG_A(self.fake_A_ext)
 
     def backward_D_basic(self, netD, real, fake):
         """Calculate GAN loss for the discriminator
@@ -172,6 +183,7 @@ class MyCycleGANModel(BaseModel):
         # Identity loss
         if lambda_idt > 0:
             # G_A should be identity if real_B is fed: ||G_A(B) - B||
+
             self.idt_A = self.netG_A(self.real_B)
             self.loss_idt_A = self.criterionIdt(self.idt_A, self.real_B) * lambda_B * lambda_idt
             # G_B should be identity if real_A is fed: ||G_B(A) - A||
