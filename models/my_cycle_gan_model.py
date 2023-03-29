@@ -110,20 +110,7 @@ class MyCycleGANModel(BaseModel):
         """
         AtoB = self.opt.direction == 'AtoB'
         self.real_A = input['A' if AtoB else 'B'].to(self.device)
-        # print(self.real_A.shape)
-        # print(self.real_A)
-        # print(self.real_A.shape[0])
-
-        self.real_A_ext = torch.cat((self.real_A, torch.full((self.real_A.shape[0], 1, 512, 512), 20.0).to(self.device)), dim=1)
-        # print(self.real_A_ext.shape)
-        # print(self.real_A_ext)
-
-
         self.real_B = input['B' if AtoB else 'A'].to(self.device)
-
-        self.real_B_ext = torch.cat((self.real_B, torch.full((self.real_B.shape[0], 1, 512, 512), 0.05).to(self.device)), dim=1)
-        # print(self.real_B_ext.shape)
-        # print(self.real_B_ext)
 
         self.image_paths = input['A_paths' if AtoB else 'B_paths']
 
@@ -135,10 +122,12 @@ class MyCycleGANModel(BaseModel):
         # self.fake_A = self.netG_B(self.real_B)  # G_B(B)
         # self.rec_B = self.netG_A(self.fake_A)   # G_A(G_B(B))
 
+        self.real_A_ext = torch.cat((self.real_A, torch.full((self.real_A.shape[0], 1, 512, 512), 20.0).to(self.device)), dim=1)
         self.fake_B = self.netG_A(self.real_A_ext)
         self.fake_B_ext = torch.cat((self.fake_B, torch.full((self.fake_B.shape[0], 1, 512, 512), 0.05).to(self.device)), dim=1)
         self.rec_A = self.netG_B(self.fake_B_ext)
 
+        self.real_B_ext = torch.cat((self.real_B, torch.full((self.real_B.shape[0], 1, 512, 512), 0.05).to(self.device)), dim=1)
         self.fake_A = self.netG_B(self.real_B_ext)
         self.fake_A_ext = torch.cat((self.fake_A, torch.full((self.fake_A.shape[0], 1, 512, 512), 20.0).to(self.device)), dim=1)
         self.rec_B = self.netG_A(self.fake_A_ext)
@@ -184,10 +173,17 @@ class MyCycleGANModel(BaseModel):
         if lambda_idt > 0:
             # G_A should be identity if real_B is fed: ||G_A(B) - B||
 
-            self.idt_A = self.netG_A(self.real_B)
+            self.real_B_idt_ext = torch.cat(
+                (self.real_B, torch.full((self.real_B.shape[0], 1, 512, 512), 1.0).to(self.device)), dim=1)
+
+            self.idt_A = self.netG_A(self.real_B_idt_ext)
             self.loss_idt_A = self.criterionIdt(self.idt_A, self.real_B) * lambda_B * lambda_idt
             # G_B should be identity if real_A is fed: ||G_B(A) - A||
-            self.idt_B = self.netG_B(self.real_A)
+
+            self.real_A_idt_ext = torch.cat(
+                (self.real_A, torch.full((self.real_A.shape[0], 1, 512, 512), 1.0).to(self.device)), dim=1)
+
+            self.idt_B = self.netG_B(self.real_A_idt_ext)
             self.loss_idt_B = self.criterionIdt(self.idt_B, self.real_A) * lambda_A * lambda_idt
         else:
             self.loss_idt_A = 0
