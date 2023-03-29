@@ -106,8 +106,24 @@ class MyCycleGANModel(BaseModel):
         """
         AtoB = self.opt.direction == 'AtoB'
         self.real_A = input['A' if AtoB else 'B'].to(self.device)
+        # print(self.real_A.shape)
+        # print(self.real_A)
+        # print(self.real_A.shape[0])
+
+        self.real_A_ext = torch.cat((self.real_A, torch.full((self.real_A.shape[0], 1, 512, 512), 20.0).to(self.device)), dim=1)
+        # print(self.real_A_ext.shape)
+        # print(self.real_A_ext)
+
+
         self.real_B = input['B' if AtoB else 'A'].to(self.device)
+
+        self.real_B_ext = torch.cat((self.real_B, torch.full((self.real_B.shape[0], 1, 512, 512), 0.0).to(self.device)), dim=1)
+        # print(self.real_B_ext.shape)
+        # print(self.real_B_ext)
+
+
         self.image_paths = input['A_paths' if AtoB else 'B_paths']
+
 
     def forward(self):
         """Run forward pass; called by both functions <optimize_parameters> and <test>."""
