@@ -1,6 +1,8 @@
 .DS_Store
 debug*
-datasets/
+datasets/*
+!datasets/*.py
+!datasets/*.sh
 checkpoints/
 results/
 build/
