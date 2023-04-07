@@ -1,6 +1,7 @@
 from PIL import Image, ImageFilter
 import os
 import random
+from tqdm import tqdm
 
 
 class ImageProcessor:
@@ -31,7 +32,7 @@ class ImageProcessor:
         new_folder_name = f"{folder_name}_{method}"
         new_folder_path = os.path.join(os.path.dirname(self.path), new_folder_name)
         os.makedirs(new_folder_path, exist_ok=True)
-        for file_name in os.listdir(self.path):
+        for file_name in tqdm(os.listdir(self.path)):
             file_path = os.path.join(self.path, file_name)
             if os.path.isfile(file_path):
                 if isinstance(n_range, int):
