@@ -108,6 +108,15 @@ class MyCycleGANModel(BaseModel):
         output = torch.cat((input, add), dim=1)
         return output
 
+    def add_blur(self, input, blur):
+        batch = input.shape[0]
+        size_0 = input.shape[2]
+        size_1 = input.shape[3]
+        print(blur)
+        add = torch.full((batch, 1, size_0, size_1), blur).to(self.device)
+        output = torch.cat((input, add), dim=1)
+        return output
+
     def set_input(self, input):
         """Unpack input data from the dataloader and perform necessary pre-processing steps.
 
@@ -122,6 +131,9 @@ class MyCycleGANModel(BaseModel):
 
         self.image_paths = input['A_paths' if AtoB else 'B_paths']
 
+        self.blur = input['A_blur']
+        print("****blur:", self.blur.shape, self.blur)
+
 
     def forward(self):
         """Run forward pass; called by both functions <optimize_parameters> and <test>."""
@@ -130,8 +142,10 @@ class MyCycleGANModel(BaseModel):
         # self.fake_A = self.netG_B(self.real_B)  # G_B(B)
         # self.rec_B = self.netG_A(self.fake_A)   # G_A(G_B(B))
 
-        real_A_ext = self.add_dim(self.real_A, 20.0)
+        real_A_ext = self.add_blur(self.real_A, self.blur)
+        print(real_A_ext)
         self.fake_B = self.netG_A(real_A_ext)
+        exit()
 
         fake_B_ext = self.add_dim(self.fake_B, 0.05)
         self.rec_A = self.netG_B(fake_B_ext)
@@ -139,7 +153,7 @@ class MyCycleGANModel(BaseModel):
         real_B_ext = self.add_dim(self.real_B, 0.05)
         self.fake_A = self.netG_B(real_B_ext)
 
-        fake_A_ext = self.add_dim(self.fake_A, 20.0)
+        fake_A_ext = self.add_blur(self.fake_A, self.blur)
         self.rec_B = self.netG_A(fake_A_ext)
 
     def backward_D_basic(self, netD, real, fake):

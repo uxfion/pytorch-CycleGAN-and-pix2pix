@@ -65,4 +65,4 @@ class ImageProcessor:
 
 if __name__ == "__main__":
     image_processor = ImageProcessor("./datasets/coco/trainB")
-    image_processor.blur((0,8), "Gaussian")
+    image_processor.blur((0,20), "Gaussian")
