@@ -112,16 +112,34 @@ class MyCycleGANModel(BaseModel):
         batch = input.shape[0]
         size_0 = input.shape[2]
         size_1 = input.shape[3]
-        print("****input:", input.shape, '\n', input)
-        print("****blur:", blur.shape, '\n', blur)
-        # add = torch.full((batch, 1, size_0, size_1), blur).to(self.device)
+        # print("****input:", input.shape, '\n', input)
+        # print("****blur:", blur.shape, '\n', blur)
+        blur = blur.float()
         add = blur.view(batch, 1, 1, 1)
-        print("****add:", add.shape, '\n', add)
-        add = add.repeat(1, 1, size_0, size_1)
-        print("****add2:", add.shape, '\n', add)
+        # print("****add:", add.shape, '\n', add)
+        add = add.repeat(1, 1, size_0, size_1).to(self.device)
+        # print("****add2:", add.shape, '\n', add)
 
         output = torch.cat((input, add), dim=1)
-        print("****output:", output.shape, '\n', output)
+        # print("****output:", output.shape, '\n', output)
+        return output
+
+    def add_blur_revert(self, input, blur):
+        batch = input.shape[0]
+        size_0 = input.shape[2]
+        size_1 = input.shape[3]
+        # print("****input:", input.shape, '\n', input)
+        # print("****blur:", blur.shape, '\n', blur)
+        # blur_revert = torch.reciprocal(blur.float())
+        blur_revert = -blur.float()
+        # print("****blur:", blur_revert.shape, '\n', blur_revert)
+        add = blur_revert.view(batch, 1, 1, 1)
+        # print("****add:", add.shape, '\n', add)
+        add = add.repeat(1, 1, size_0, size_1).to(self.device)
+        # print("****add2:", add.shape, '\n', add)
+
+        output = torch.cat((input, add), dim=1)
+        # print("****output:", output.shape, '\n', output)
         return output
 
     def set_input(self, input):
@@ -149,12 +167,11 @@ class MyCycleGANModel(BaseModel):
 
         real_A_ext = self.add_blur(self.real_A, self.blur)
         self.fake_B = self.netG_A(real_A_ext)
-        exit()
 
-        fake_B_ext = self.add_dim(self.fake_B, 0.05)
+        fake_B_ext = self.add_blur_revert(self.fake_B, self.blur)
         self.rec_A = self.netG_B(fake_B_ext)
 
-        real_B_ext = self.add_dim(self.real_B, 0.05)
+        real_B_ext = self.add_blur_revert(self.real_B, self.blur)
         self.fake_A = self.netG_B(real_B_ext)
 
         fake_A_ext = self.add_blur(self.fake_A, self.blur)
@@ -200,12 +217,12 @@ class MyCycleGANModel(BaseModel):
         # Identity loss
         if lambda_idt > 0:
             # G_A should be identity if real_B is fed: ||G_A(B) - B||
-            real_B_idt_ext = self.add_dim(self.real_B, 1.0)
+            real_B_idt_ext = self.add_dim(self.real_B, 0.0)
             self.idt_A = self.netG_A(real_B_idt_ext)
             self.loss_idt_A = self.criterionIdt(self.idt_A, self.real_B) * lambda_B * lambda_idt
 
             # G_B should be identity if real_A is fed: ||G_B(A) - A||
-            real_A_idt_ext = self.add_dim(self.real_A, 1.0)
+            real_A_idt_ext = self.add_dim(self.real_A, 0.0)
             self.idt_B = self.netG_B(real_A_idt_ext)
             self.loss_idt_B = self.criterionIdt(self.idt_B, self.real_A) * lambda_A * lambda_idt
         else:

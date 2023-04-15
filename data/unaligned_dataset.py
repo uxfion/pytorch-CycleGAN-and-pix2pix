@@ -61,7 +61,8 @@ class UnalignedDataset(BaseDataset):
         A = self.transform_A(A_img)
         B = self.transform_B(B_img)
 
-        A_blur = int(A_path.split('/')[-1].split('_')[-1].split('.')[0])
+        A_blur = float(A_path.split('/')[-1].split('_')[-1].split('.')[0])/10.0
+
 
 
         return {'A': A, 'B': B, 'A_paths': A_path, 'B_paths': B_path, 'A_blur': A_blur}
