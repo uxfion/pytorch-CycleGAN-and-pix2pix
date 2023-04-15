@@ -112,9 +112,16 @@ class MyCycleGANModel(BaseModel):
         batch = input.shape[0]
         size_0 = input.shape[2]
         size_1 = input.shape[3]
-        print(blur)
-        add = torch.full((batch, 1, size_0, size_1), blur).to(self.device)
+        print("****input:", input.shape, '\n', input)
+        print("****blur:", blur.shape, '\n', blur)
+        # add = torch.full((batch, 1, size_0, size_1), blur).to(self.device)
+        add = blur.view(batch, 1, 1, 1)
+        print("****add:", add.shape, '\n', add)
+        add = add.repeat(1, 1, size_0, size_1)
+        print("****add2:", add.shape, '\n', add)
+
         output = torch.cat((input, add), dim=1)
+        print("****output:", output.shape, '\n', output)
         return output
 
     def set_input(self, input):
@@ -132,8 +139,6 @@ class MyCycleGANModel(BaseModel):
         self.image_paths = input['A_paths' if AtoB else 'B_paths']
 
         self.blur = input['A_blur']
-        print("****blur:", self.blur.shape, self.blur)
-
 
     def forward(self):
         """Run forward pass; called by both functions <optimize_parameters> and <test>."""
@@ -143,7 +148,6 @@ class MyCycleGANModel(BaseModel):
         # self.rec_B = self.netG_A(self.fake_A)   # G_A(G_B(B))
 
         real_A_ext = self.add_blur(self.real_A, self.blur)
-        print(real_A_ext)
         self.fake_B = self.netG_A(real_A_ext)
         exit()
 
