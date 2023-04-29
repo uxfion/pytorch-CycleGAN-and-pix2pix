@@ -53,7 +53,9 @@ class AlignedDataset(BaseDataset):
         A = A_transform(A)
         B = B_transform(B)
 
-        return {'A': A, 'B': B, 'A_paths': AB_path, 'B_paths': AB_path}
+        A_blur = float(AB_path.split('/')[-1].split('_')[-1].split('.')[0])/10.0
+
+        return {'A': A, 'B': B, 'A_paths': AB_path, 'B_paths': AB_path, 'A_blur': A_blur}
 
     def __len__(self):
         """Return the total number of images in the dataset."""
