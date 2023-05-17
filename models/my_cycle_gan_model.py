@@ -94,7 +94,7 @@ class MyCycleGANModel(BaseModel):
             self.criterionGAN = networks.GANLoss(opt.gan_mode).to(self.device)  # define GAN loss.
             self.criterionCycle = torch.nn.L1Loss()
             self.criterionIdt = torch.nn.L1Loss()
-            self.criterionPix2Pix = torch.nn.MSELoss()
+            self.criterionPix2Pix = torch.nn.L1Loss()
             # initialize optimizers; schedulers will be automatically created by function <BaseModel.setup>.
             self.optimizer_G = torch.optim.Adam(itertools.chain(self.netG_A.parameters(), self.netG_B.parameters()), lr=opt.lr, betas=(opt.beta1, 0.999))
             self.optimizer_D = torch.optim.Adam(itertools.chain(self.netD_A.parameters(), self.netD_B.parameters()), lr=opt.lr, betas=(opt.beta1, 0.999))
@@ -156,6 +156,7 @@ class MyCycleGANModel(BaseModel):
         self.real_B = input['B' if AtoB else 'A'].to(self.device)
 
         self.image_paths = input['A_paths' if AtoB else 'B_paths']
+        # print(self.image_paths)
 
         self.blur = input['A_blur']
 
@@ -166,15 +167,19 @@ class MyCycleGANModel(BaseModel):
         # self.fake_A = self.netG_B(self.real_B)  # G_B(B)
         # self.rec_B = self.netG_A(self.fake_A)   # G_A(G_B(B))
 
+        # print("****input:", self.real_A.shape, '\n', self.real_A)
+        # print("***** self.fake_B = self.netG_A(real_A_ext)")
         real_A_ext = self.add_blur(self.real_A, self.blur)
         self.fake_B = self.netG_A(real_A_ext)
-
+        # print("***** self.rec_A = self.netG_B(fake_B_ext)")
         fake_B_ext = self.add_blur_revert(self.fake_B, self.blur)
         self.rec_A = self.netG_B(fake_B_ext)
 
+        # print("****input:", self.real_B.shape, '\n', self.real_B)
+        # print("***** self.fake_A = self.netG_B(real_B_ext)")
         real_B_ext = self.add_blur_revert(self.real_B, self.blur)
         self.fake_A = self.netG_B(real_B_ext)
-
+        # print("***** self.rec_B = self.netG_A(fake_A_ext)")
         fake_A_ext = self.add_blur(self.fake_A, self.blur)
         self.rec_B = self.netG_A(fake_A_ext)
 
@@ -241,8 +246,8 @@ class MyCycleGANModel(BaseModel):
         # combined loss and calculate gradients
 
         # pix2pix loss
-        self.loss_pix2pix_A = self.criterionPix2Pix(self.fake_B, self.real_B)
-        self.loss_pix2pix_B = self.criterionPix2Pix(self.fake_A, self.real_A)
+        self.loss_pix2pix_A = self.criterionPix2Pix(self.fake_B, self.real_B) * lambda_A
+        self.loss_pix2pix_B = self.criterionPix2Pix(self.fake_A, self.real_A) * lambda_B
 
         self.loss_G = self.loss_G_A + self.loss_G_B + self.loss_cycle_A + self.loss_cycle_B + self.loss_idt_A + self.loss_idt_B + self.loss_pix2pix_A + self.loss_pix2pix_B
         self.loss_G.backward()

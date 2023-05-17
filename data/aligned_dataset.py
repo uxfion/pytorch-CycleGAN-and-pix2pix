@@ -53,7 +53,7 @@ class AlignedDataset(BaseDataset):
         A = A_transform(A)
         B = B_transform(B)
 
-        A_blur = float(AB_path.split('/')[-1].split('_')[-1].split('.')[0])/10.0
+        A_blur = float(AB_path.split('/')[-1].split('_')[-1].split('.')[0])/100.0
 
         return {'A': A, 'B': B, 'A_paths': AB_path, 'B_paths': AB_path, 'A_blur': A_blur}
 
