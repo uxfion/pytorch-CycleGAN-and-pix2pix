@@ -64,5 +64,8 @@ class ImageProcessor:
         
 
 if __name__ == "__main__":
-    image_processor = ImageProcessor("./datasets/coco/trainB")
-    image_processor.blur((0,20), "Gaussian")
+    image_processor = ImageProcessor("./datasets/coco_paired_all_sigma/trainB")
+    # image_processor.blur((0,20), "Gaussian")
+    for i in tqdm(range(20)):
+        print(i)
+        image_processor.blur(i, "Gaussian")

@@ -1,4 +1,5 @@
 import os
+import tqdm
 
 from PIL import Image
 
@@ -21,9 +22,14 @@ def align_images(a_file_paths, b_file_paths, target_path):
     if not os.path.exists(target_path):
         os.makedirs(target_path)
 
-    for i in range(len(a_file_paths)):
+    for i in tqdm.tqdm(range(len(a_file_paths))):
         img_a = Image.open(a_file_paths[i])
-        img_b = Image.open(b_file_paths[i])
+
+        if len(a_file_paths)%len(b_file_paths) == 0:
+            img_b = Image.open(b_file_paths[i//(len(a_file_paths)//len(b_file_paths))])
+        else:
+            img_b = Image.open(b_file_paths[i])
+
         assert(img_a.size == img_b.size)
 
         aligned_image = Image.new("RGB", (img_a.size[0] * 2, img_a.size[1]))
@@ -59,7 +65,7 @@ if __name__ == '__main__':
     train_b_path = os.path.join(dataset_folder, 'trainB')
     train_a_file_paths = get_file_paths(train_a_path)
     train_b_file_paths = get_file_paths(train_b_path)
-    assert(len(train_a_file_paths) == len(train_b_file_paths))
+    assert((len(train_a_file_paths) == len(train_b_file_paths))|(len(train_a_file_paths)%len(train_b_file_paths)==0))
     train_path = os.path.join(dataset_folder, 'train')
 
     align_images(test_a_file_paths, test_b_file_paths, test_path)
