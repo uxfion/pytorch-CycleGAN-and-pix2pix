@@ -71,7 +71,7 @@ class MyTestModel(BaseModel):
 
     def forward(self):
         """Run forward pass."""
-        real_ext = self.add_dim(self.real, 0.2)
+        real_ext = self.add_dim(self.real, 0.20)
         self.fake = self.netG(real_ext)  # G(real)
 
     def optimize_parameters(self):
