@@ -52,10 +52,16 @@ class AlignedDataset(BaseDataset):
 
         A = A_transform(A)
         B = B_transform(B)
+        
+        A_blur = int(AB_path.split('/')[-1].split('_')[-2])
+        # print('A_blur:', A_blur)
+        B_blur = int(AB_path.split('/')[-1].split('_')[-1].split('.')[0])
+        # print('B_blur:', B_blur)
+        blur = float(A_blur - B_blur)/100.0
+        # print('sub:', blur)
+        # A_blur = float(AB_path.split('/')[-1].split('_')[-1].split('.')[0])/100.0
 
-        A_blur = float(AB_path.split('/')[-1].split('_')[-1].split('.')[0])/100.0
-
-        return {'A': A, 'B': B, 'A_paths': AB_path, 'B_paths': AB_path, 'A_blur': A_blur}
+        return {'A': A, 'B': B, 'A_paths': AB_path, 'B_paths': AB_path, 'blur': blur}
 
     def __len__(self):
         """Return the total number of images in the dataset."""

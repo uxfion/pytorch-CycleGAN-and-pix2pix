@@ -158,7 +158,7 @@ class MyCycleGANModel(BaseModel):
         self.image_paths = input['A_paths' if AtoB else 'B_paths']
         # print(self.image_paths)
 
-        self.blur = input['A_blur']
+        self.blur = input['blur']
 
     def forward(self):
         """Run forward pass; called by both functions <optimize_parameters> and <test>."""

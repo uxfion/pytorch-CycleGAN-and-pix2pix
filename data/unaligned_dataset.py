@@ -65,7 +65,7 @@ class UnalignedDataset(BaseDataset):
 
 
 
-        return {'A': A, 'B': B, 'A_paths': A_path, 'B_paths': B_path, 'A_blur': A_blur}
+        return {'A': A, 'B': B, 'A_paths': A_path, 'B_paths': B_path, 'blur': A_blur}
 
     def __len__(self):
         """Return the total number of images in the dataset.
