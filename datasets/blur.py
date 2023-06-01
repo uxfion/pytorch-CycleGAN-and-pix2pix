@@ -103,6 +103,16 @@ class ImageProcessor:
 
 if __name__ == "__main__":
     image_processor = ImageProcessor("./datasets/coco/raw")
+
+    print("Round 1")
+    image_processor.blur_pair((0,20), "Gaussian")
+    print("Round 2")
+    image_processor.blur_pair((0,20), "Gaussian")
+    print("Round 3")
+    image_processor.blur_pair((0,20), "Gaussian")
+    print("Round 4")
+    image_processor.blur_pair((0,20), "Gaussian")
+    print("Round 5")
     image_processor.blur_pair((0,20), "Gaussian")
     # for i in tqdm(range(20)):
     #     print(i)
