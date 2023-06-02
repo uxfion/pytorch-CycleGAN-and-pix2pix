@@ -46,7 +46,7 @@ class MyAlignedDataset(BaseDataset):
         # A = AB.crop((0, 0, w2, h))
         # B = AB.crop((w2, 0, w, h))
 
-        n_range = [0, 20]
+        n_range = [0, 10]
 
         n_A = random.randint(min(n_range[0], n_range[1]), max(n_range[0], n_range[1]))
         n_B = random.randint(min(n_range[0], n_range[1]), n_A)
@@ -68,7 +68,7 @@ class MyAlignedDataset(BaseDataset):
         # print('A_blur:', A_blur)
         B_blur = n_B
         # print('B_blur:', B_blur)
-        blur = float(A_blur - B_blur)/100.0
+        blur = float(A_blur - B_blur)/50.0
         # print('sub:', blur)
         # A_blur = float(AB_path.split('/')[-1].split('_')[-1].split('.')[0])/100.0
 

@@ -225,12 +225,12 @@ class MyCycleGANModel(BaseModel):
             # G_A should be identity if real_B is fed: ||G_A(B) - B||
             real_B_idt_ext = self.add_dim(self.real_B, 0.0)
             self.idt_A = self.netG_A(real_B_idt_ext)
-            self.loss_idt_A = self.criterionIdt(self.idt_A, self.real_B) * lambda_B * lambda_idt
+            self.loss_idt_A = self.criterionIdt(self.idt_A, self.real_B) * lambda_B * lambda_idt * 0
 
             # G_B should be identity if real_A is fed: ||G_B(A) - A||
             real_A_idt_ext = self.add_dim(self.real_A, 0.0)
             self.idt_B = self.netG_B(real_A_idt_ext)
-            self.loss_idt_B = self.criterionIdt(self.idt_B, self.real_A) * lambda_A * lambda_idt
+            self.loss_idt_B = self.criterionIdt(self.idt_B, self.real_A) * lambda_A * lambda_idt * 0
         else:
             self.loss_idt_A = 0
             self.loss_idt_B = 0
@@ -246,8 +246,8 @@ class MyCycleGANModel(BaseModel):
         # combined loss and calculate gradients
 
         # pix2pix loss
-        self.loss_pix2pix_A = self.criterionPix2Pix(self.fake_B, self.real_B) * lambda_A
-        self.loss_pix2pix_B = self.criterionPix2Pix(self.fake_A, self.real_A) * lambda_B
+        self.loss_pix2pix_A = self.criterionPix2Pix(self.fake_B, self.real_B) * lambda_A * 100
+        self.loss_pix2pix_B = self.criterionPix2Pix(self.fake_A, self.real_A) * lambda_B * 0.1
 
         self.loss_G = self.loss_G_A + self.loss_G_B + self.loss_cycle_A + self.loss_cycle_B + self.loss_idt_A + self.loss_idt_B + self.loss_pix2pix_A + self.loss_pix2pix_B
         self.loss_G.backward()
