@@ -4,6 +4,23 @@ from util.image_pool import ImagePool
 from .base_model import BaseModel
 from . import networks
 
+import torch.nn as nn
+from torchvision.models import vgg16
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+class PerceptualLoss(nn.Module):
+    def __init__(self):
+        super(PerceptualLoss, self).__init__()
+        vgg = vgg16(pretrained=True)
+        self.feature_extractor = nn.Sequential(*list(vgg.features)[:23]).to(device)
+        for param in self.feature_extractor.parameters():
+            param.requires_grad = False
+
+    def forward(self, input, target):
+        input_features = self.feature_extractor(input)
+        target_features = self.feature_extractor(target)
+        return nn.functional.mse_loss(input_features, target_features)
 
 class MyCycleGANModel(BaseModel):
     """
@@ -52,7 +69,7 @@ class MyCycleGANModel(BaseModel):
         """
         BaseModel.__init__(self, opt)
         # specify the training losses you want to print out. The training/test scripts will call <BaseModel.get_current_losses>
-        self.loss_names = ['D_A', 'G_A', 'cycle_A', 'idt_A', 'pix2pix_A', 'D_B', 'G_B', 'cycle_B', 'idt_B', 'pix2pix_B']
+        self.loss_names = ['D_A', 'G_A', 'cycle_A', 'idt_A', 'pix2pix_A', 'perceptual_A', 'D_B', 'G_B', 'cycle_B', 'idt_B', 'pix2pix_B', 'perceptual_B']
         # specify the images you want to save/display. The training/test scripts will call <BaseModel.get_current_visuals>
         visual_names_A = ['real_A', 'fake_B', 'rec_A']
         visual_names_B = ['real_B', 'fake_A', 'rec_B']
@@ -95,6 +112,8 @@ class MyCycleGANModel(BaseModel):
             self.criterionCycle = torch.nn.L1Loss()
             self.criterionIdt = torch.nn.L1Loss()
             self.criterionPix2Pix = torch.nn.L1Loss()
+            self.criterionPerceptual = PerceptualLoss()
+
             # initialize optimizers; schedulers will be automatically created by function <BaseModel.setup>.
             self.optimizer_G = torch.optim.Adam(itertools.chain(self.netG_A.parameters(), self.netG_B.parameters()), lr=opt.lr, betas=(opt.beta1, 0.999))
             self.optimizer_D = torch.optim.Adam(itertools.chain(self.netD_A.parameters(), self.netD_B.parameters()), lr=opt.lr, betas=(opt.beta1, 0.999))
@@ -243,13 +262,17 @@ class MyCycleGANModel(BaseModel):
         self.loss_cycle_A = self.criterionCycle(self.rec_A, self.real_A) * lambda_A
         # Backward cycle loss || G_A(G_B(B)) - B||
         self.loss_cycle_B = self.criterionCycle(self.rec_B, self.real_B) * lambda_B
-        # combined loss and calculate gradients
 
         # pix2pix loss
-        self.loss_pix2pix_A = self.criterionPix2Pix(self.fake_B, self.real_B) * lambda_A * 100
-        self.loss_pix2pix_B = self.criterionPix2Pix(self.fake_A, self.real_A) * lambda_B * 0.1
+        self.loss_pix2pix_A = self.criterionPix2Pix(self.fake_B, self.real_B) * 50
+        self.loss_pix2pix_B = self.criterionPix2Pix(self.fake_A, self.real_A) * 50
 
-        self.loss_G = self.loss_G_A + self.loss_G_B + self.loss_cycle_A + self.loss_cycle_B + self.loss_idt_A + self.loss_idt_B + self.loss_pix2pix_A + self.loss_pix2pix_B
+        # perceptual loss
+        self.loss_perceptual_A = self.criterionPerceptual(self.fake_B, self.real_B) * 50
+        self.loss_perceptual_B = self.criterionPerceptual(self.fake_A, self.real_A) * 50
+
+        # combined loss and calculate gradients
+        self.loss_G = self.loss_G_A + self.loss_G_B + self.loss_cycle_A + self.loss_cycle_B + self.loss_idt_A + self.loss_idt_B + self.loss_pix2pix_A + self.loss_pix2pix_B + self.loss_perceptual_A + self.loss_perceptual_B
         self.loss_G.backward()
 
     def optimize_parameters(self):
