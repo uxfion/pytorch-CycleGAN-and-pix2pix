@@ -39,10 +39,19 @@ try:
 except ImportError:
     print('Warning: wandb package cannot be found. The option "--use_wandb" will result in error.')
 
+import numpy as np
+def rgb2gray(rgb):
+    """ Convert RGB image to grayscale """
+    r, g, b = rgb[0,:,:], rgb[1,:,:], rgb[2,:,:]
+    gray = 0.2989 * r + 0.5870 * g + 0.1140 * b
+    return gray.unsqueeze(0).cpu()
+
+
+
 
 if __name__ == '__main__':
 
-    sigma_values = [0, 5, 10, 15, 20]
+    sigma_values = [0]
 
     opt = TestOptions().parse()  # get test options
     # hard-code some parameters for test
@@ -83,6 +92,15 @@ if __name__ == '__main__':
             visuals = model.get_current_visuals()  # get image results
             img_path = model.get_image_paths()     # get image paths
             img_path_with_sigma = [os.path.splitext(path)[0] + f"_sigma{sigma}" + os.path.splitext(path)[1] for path in img_path]
+
+            # print(img_path_with_sigma)
+            for j, path in enumerate(img_path_with_sigma):
+                print(path)
+                if 'ultrasound' in path:
+                    print('ultrasound')
+                    for key in visuals.keys():
+                        visuals[key][j] = rgb2gray(visuals[key][j])
+
 
             print('processing (%04d)-th image... %s' % (i, img_path_with_sigma))
             save_images(webpage, visuals, img_path_with_sigma, aspect_ratio=opt.aspect_ratio, width=opt.display_winsize, use_wandb=opt.use_wandb)
