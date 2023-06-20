@@ -49,8 +49,14 @@ class MyAlignedDataset(BaseDataset):
         n_range = [0, 10]
 
         n_A = random.randint(min(n_range[0], n_range[1]), max(n_range[0], n_range[1]))
-        n_B = random.randint(min(n_range[0], n_range[1]), n_A)
-
+        # n_B = random.randint(min(n_range[0], n_range[1]), n_A)
+        # check if the path contains 'ultrasound'
+        if 'ultrasound' in AB_path:
+            # if the image is an ultrasound image, we only blur image A and not image B
+            n_B = 0  # not blurring B for ultrasound images
+        else:
+            # if the image is not an ultrasound image, we blur both image A and image B
+            n_B = random.randint(min(n_range[0], n_range[1]), n_A)
 
         A = AB.filter(ImageFilter.GaussianBlur(radius=n_A))
         B = AB.filter(ImageFilter.GaussianBlur(radius=n_B))
