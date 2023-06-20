@@ -32,6 +32,7 @@ from data import create_dataset
 from models import create_model
 from util.visualizer import save_images
 from util import html
+import torch
 
 try:
     import wandb
@@ -40,6 +41,9 @@ except ImportError:
 
 
 if __name__ == '__main__':
+
+    sigma_values = [0, 5, 10, 15, 20]
+
     opt = TestOptions().parse()  # get test options
     # hard-code some parameters for test
     opt.num_threads = 0   # test code only supports num_threads = 0
@@ -67,14 +71,19 @@ if __name__ == '__main__':
     # For [CycleGAN]: It should not affect CycleGAN as CycleGAN uses instancenorm without dropout.
     if opt.eval:
         model.eval()
-    for i, data in enumerate(dataset):
-        if i >= opt.num_test:  # only apply our model to opt.num_test images.
-            break
-        model.set_input(data)  # unpack data from data loader
-        model.test()           # run inference
-        visuals = model.get_current_visuals()  # get image results
-        img_path = model.get_image_paths()     # get image paths
-        if i % 5 == 0:  # save images to an HTML file
-            print('processing (%04d)-th image... %s' % (i, img_path))
-        save_images(webpage, visuals, img_path, aspect_ratio=opt.aspect_ratio, width=opt.display_winsize, use_wandb=opt.use_wandb)
+    for sigma in sigma_values:
+        for i, data in enumerate(dataset):
+            if i >= opt.num_test:  # only apply our model to opt.num_test images.
+                break
+            model.set_input(data)  # unpack data from data loader
+            # model.test()           # run inference
+            with torch.no_grad():
+                model.forward(sigma)
+                model.compute_visuals()
+            visuals = model.get_current_visuals()  # get image results
+            img_path = model.get_image_paths()     # get image paths
+            img_path_with_sigma = [os.path.splitext(path)[0] + f"_sigma{sigma}" + os.path.splitext(path)[1] for path in img_path]
+
+            print('processing (%04d)-th image... %s' % (i, img_path_with_sigma))
+            save_images(webpage, visuals, img_path_with_sigma, aspect_ratio=opt.aspect_ratio, width=opt.display_winsize, use_wandb=opt.use_wandb)
     webpage.save()  # save the HTML

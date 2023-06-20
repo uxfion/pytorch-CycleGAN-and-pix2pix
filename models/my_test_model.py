@@ -69,9 +69,9 @@ class MyTestModel(BaseModel):
         output = torch.cat((input, add), dim=1)
         return output
 
-    def forward(self):
+    def forward(self, sigma):
         """Run forward pass."""
-        real_ext = self.add_dim(self.real, 10/50.0)
+        real_ext = self.add_dim(self.real, sigma/50.0)
         self.fake = self.netG(real_ext)  # G(real)
 
     def optimize_parameters(self):
