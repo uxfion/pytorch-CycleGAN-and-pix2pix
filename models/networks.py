@@ -3,6 +3,7 @@ import torch.nn as nn
 from torch.nn import init
 import functools
 from torch.optim import lr_scheduler
+from .hyper import hyperDecoder
 
 
 ###############################################################################
@@ -355,6 +356,7 @@ class ResnetGenerator(nn.Module):
 
             model += [ResnetBlock(ngf * mult, padding_type=padding_type, norm_layer=norm_layer, use_dropout=use_dropout, use_bias=use_bias)]
 
+        # decoder
         for i in range(n_downsampling):  # add upsampling layers
             mult = 2 ** (n_downsampling - i)
             model += [nn.ConvTranspose2d(ngf * mult, int(ngf * mult / 2),
@@ -369,9 +371,28 @@ class ResnetGenerator(nn.Module):
 
         self.model = nn.Sequential(*model)
 
+
+        # self.encoder = nn.Sequential(*model)
+        # args = {
+        #     'seq2seq': {
+        #         'ndims': 2,
+        #         'c_dec': [256, 128, 64, 3],  # 依据网络架构可以进行修改
+        #         'k_dec': [3, 3, 3, 3],  # 根据需要修改
+        #         's_dec': [2, 2, 2, 1],  # 根据需要修改
+        #         'nres_dec': 9,  # 根据需要修改，这里选择9是因为netG参数是resnet_9blocks
+        #         'c_s': 256,  # 根据需要修改
+        #         'c_w': 256,  # 根据需要修改
+        #         'norm': 'InstanceNorm',  # 因为norm参数为instance
+        #         'c_enc': [64, 128, 256, 512]  # 依据网络架构可以进行修改
+        #     }
+        # }
+        # self.decoder = hyperDecoder(args)
+
     def forward(self, input):
         """Standard forward"""
         return self.model(input)
+        # output = self.encoder(input)
+        # return self.decoder(output, s)
 
 
 class ResnetBlock(nn.Module):
