@@ -351,48 +351,58 @@ class ResnetGenerator(nn.Module):
                       norm_layer(ngf * mult * 2),
                       nn.ReLU(True)]
 
-        mult = 2 ** n_downsampling
-        for i in range(n_blocks):       # add ResNet blocks
+        # mult = 2 ** n_downsampling
+        # for i in range(n_blocks):       # add ResNet blocks
+        #
+        #     model += [ResnetBlock(ngf * mult, padding_type=padding_type, norm_layer=norm_layer, use_dropout=use_dropout, use_bias=use_bias)]
 
-            model += [ResnetBlock(ngf * mult, padding_type=padding_type, norm_layer=norm_layer, use_dropout=use_dropout, use_bias=use_bias)]
-
-        # decoder
-        for i in range(n_downsampling):  # add upsampling layers
-            mult = 2 ** (n_downsampling - i)
-            model += [nn.ConvTranspose2d(ngf * mult, int(ngf * mult / 2),
-                                         kernel_size=3, stride=2,
-                                         padding=1, output_padding=1,
-                                         bias=use_bias),
-                      norm_layer(int(ngf * mult / 2)),
-                      nn.ReLU(True)]
-        model += [nn.ReflectionPad2d(3)]
-        model += [nn.Conv2d(ngf, output_nc, kernel_size=7, padding=0)]
-        model += [nn.Tanh()]
-
-        self.model = nn.Sequential(*model)
+        # # decoder
+        # for i in range(n_downsampling):  # add upsampling layers
+        #     mult = 2 ** (n_downsampling - i)
+        #     model += [nn.ConvTranspose2d(ngf * mult, int(ngf * mult / 2),
+        #                                  kernel_size=3, stride=2,
+        #                                  padding=1, output_padding=1,
+        #                                  bias=use_bias),
+        #               norm_layer(int(ngf * mult / 2)),
+        #               nn.ReLU(True)]
+        # model += [nn.ReflectionPad2d(3)]
+        # model += [nn.Conv2d(ngf, output_nc, kernel_size=7, padding=0)]
+        # model += [nn.Tanh()]
+        #
+        # self.model = nn.Sequential(*model)
 
 
-        # self.encoder = nn.Sequential(*model)
-        # args = {
-        #     'seq2seq': {
-        #         'ndims': 2,
-        #         'c_dec': [256, 128, 64, 3],  # 依据网络架构可以进行修改
-        #         'k_dec': [3, 3, 3, 3],  # 根据需要修改
-        #         's_dec': [2, 2, 2, 1],  # 根据需要修改
-        #         'nres_dec': 9,  # 根据需要修改，这里选择9是因为netG参数是resnet_9blocks
-        #         'c_s': 256,  # 根据需要修改
-        #         'c_w': 256,  # 根据需要修改
-        #         'norm': 'InstanceNorm',  # 因为norm参数为instance
-        #         'c_enc': [64, 128, 256, 512]  # 依据网络架构可以进行修改
-        #     }
-        # }
-        # self.decoder = hyperDecoder(args)
+        self.encoder = nn.Sequential(*model)
+        args = {
+            'seq2seq': {
+                'ndims': 2,     # 对应 nn.Conv2d
+                'c_dec': [128, 64, 3],  # channels for decoder
+                'k_dec': [3, 3, 7],  # ksize for decoder
+                's_dec': [2, 2, 1],  # strides for decoder
+                'nres_dec': 9,  # number of resblocks in decoder，这里选择9是因为netG参数是resnet_9blocks
+                'c_s': 20,  # sequence code length
+                'c_w': 5,  # hyperconv weight length
+                'norm': 'InstanceNorm',  # 因为norm参数为instance
+                'c_enc': [64, 128, 256]  # 因为最后一个256需要和encoder/resnet的输出一致
+            }
+        }
+        self.decoder = hyperDecoder(args)
 
-    def forward(self, input):
+        style_dim = args['seq2seq']['c_s']
+        self.style_fc = nn.Sequential(
+            nn.Linear(style_dim, style_dim),
+            nn.LeakyReLU(0.2, inplace=True),
+        )
+
+
+
+
+    def forward(self, input, s):
         """Standard forward"""
-        return self.model(input)
-        # output = self.encoder(input)
-        # return self.decoder(output, s)
+        # return self.model(input)
+        output = self.encoder(input)
+        s = self.style_fc(s)
+        return self.decoder(output, s)
 
 
 class ResnetBlock(nn.Module):

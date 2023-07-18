@@ -91,9 +91,9 @@ class MyCycleGANModel(BaseModel):
         #                                 not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids)
         # self.netG_B = networks.define_G(opt.output_nc, opt.input_nc, opt.ngf, opt.netG, opt.norm,
         #                                 not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids)
-        self.netG_A = networks.define_G(4, 3, opt.ngf, opt.netG, opt.norm,
+        self.netG_A = networks.define_G(3, 3, opt.ngf, opt.netG, opt.norm,
                                         not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids)
-        self.netG_B = networks.define_G(4, 3, opt.ngf, opt.netG, opt.norm,
+        self.netG_B = networks.define_G(3, 3, opt.ngf, opt.netG, opt.norm,
                                         not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids)
 
         if self.isTrain:  # define discriminators
@@ -178,6 +178,15 @@ class MyCycleGANModel(BaseModel):
         # print(self.image_paths)
 
         self.blur = input['blur']
+        print(self.blur)
+        c_s = 20
+        # 使用独热编码对 blur 进行编码
+        target_code = torch.zeros((self.blur.size(0), c_s))  # 创建全零的编码 Tensor，形状为 (18, 20)
+        target_code.scatter_(1, self.blur.unsqueeze(1), 1)  # 根据 blur 的值进行独热编码
+        self.target_code = target_code.to(self.device)
+        print(self.target_code)
+
+
 
     def forward(self):
         """Run forward pass; called by both functions <optimize_parameters> and <test>."""
@@ -186,21 +195,26 @@ class MyCycleGANModel(BaseModel):
         # self.fake_A = self.netG_B(self.real_B)  # G_B(B)
         # self.rec_B = self.netG_A(self.fake_A)   # G_A(G_B(B))
 
-        # print("****input:", self.real_A.shape, '\n', self.real_A)
-        # print("***** self.fake_B = self.netG_A(real_A_ext)")
-        real_A_ext = self.add_blur(self.real_A, self.blur)
-        self.fake_B = self.netG_A(real_A_ext)
-        # print("***** self.rec_A = self.netG_B(fake_B_ext)")
-        fake_B_ext = self.add_blur_revert(self.fake_B, self.blur)
-        self.rec_A = self.netG_B(fake_B_ext)
+        self.fake_B = self.netG_A(self.real_A, self.target_code)  # G_A(A)
+        self.rec_A = self.netG_B(self.fake_B, self.target_code)   # G_B(G_A(A))
+        self.fake_A = self.netG_B(self.real_B, self.target_code)  # G_B(B)
+        self.rec_B = self.netG_A(self.fake_A, self.target_code)   # G_A(G_B(B))
 
-        # print("****input:", self.real_B.shape, '\n', self.real_B)
-        # print("***** self.fake_A = self.netG_B(real_B_ext)")
-        real_B_ext = self.add_blur_revert(self.real_B, self.blur)
-        self.fake_A = self.netG_B(real_B_ext)
-        # print("***** self.rec_B = self.netG_A(fake_A_ext)")
-        fake_A_ext = self.add_blur(self.fake_A, self.blur)
-        self.rec_B = self.netG_A(fake_A_ext)
+        # # print("****input:", self.real_A.shape, '\n', self.real_A)
+        # # print("***** self.fake_B = self.netG_A(real_A_ext)")
+        # real_A_ext = self.add_blur(self.real_A, self.blur)
+        # self.fake_B = self.netG_A(real_A_ext)
+        # # print("***** self.rec_A = self.netG_B(fake_B_ext)")
+        # fake_B_ext = self.add_blur_revert(self.fake_B, self.blur)
+        # self.rec_A = self.netG_B(fake_B_ext)
+        #
+        # # print("****input:", self.real_B.shape, '\n', self.real_B)
+        # # print("***** self.fake_A = self.netG_B(real_B_ext)")
+        # real_B_ext = self.add_blur_revert(self.real_B, self.blur)
+        # self.fake_A = self.netG_B(real_B_ext)
+        # # print("***** self.rec_B = self.netG_A(fake_A_ext)")
+        # fake_A_ext = self.add_blur(self.fake_A, self.blur)
+        # self.rec_B = self.netG_A(fake_A_ext)
 
     def backward_D_basic(self, netD, real, fake):
         """Calculate GAN loss for the discriminator

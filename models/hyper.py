@@ -35,9 +35,9 @@ class hyperConv(nn.Module):
             self.b = nn.Parameter(torch.randn(self.dim_out, weight_dim).type(torch.float32))
             nn.init.constant_(self.b, 0.0)
 
-        self.conv = getattr(F, 'conv%dd' % self.ndims)
+        self.conv = getattr(F, 'conv%dd' % self.ndims)  # 如果 'self.ndims' 的值是 2，那么 'conv%dd' % self.ndims 就会变成 'conv2d'
 
-    def forward(self, x, s):
+    def forward(self, x, s):    # x: input feature maps; s: target sequence code;
         kernel = torch.matmul(self.param, self.fc(s).view(self.weight_dim, 1)).view(*self.kshape)
         if self.bias is True:
             bias = torch.matmul(self.b, self.fc_bias(s).view(self.weight_dim, 1)).view(self.dim_out)
