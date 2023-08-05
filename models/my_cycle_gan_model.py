@@ -178,13 +178,14 @@ class MyCycleGANModel(BaseModel):
         # print(self.image_paths)
 
         self.blur = input['blur']
-        print(self.blur)
+        # print(self.blur)
         c_s = 20
         # 使用独热编码对 blur 进行编码
-        target_code = torch.zeros((self.blur.size(0), c_s))  # 创建全零的编码 Tensor，形状为 (18, 20)
+        target_code = torch.zeros((self.blur.size(0), c_s))  # 创建全零的编码 Tensor，形状为 (4, 20)
         target_code.scatter_(1, self.blur.unsqueeze(1), 1)  # 根据 blur 的值进行独热编码
         self.target_code = target_code.to(self.device)
-        print(self.target_code)
+        # print(self.target_code)
+        # print(self.target_code.shape)
 
 
 

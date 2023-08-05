@@ -379,9 +379,9 @@ class ResnetGenerator(nn.Module):
                 'c_dec': [128, 64, 3],  # channels for decoder
                 'k_dec': [3, 3, 7],  # ksize for decoder
                 's_dec': [2, 2, 1],  # strides for decoder
-                'nres_dec': 9,  # number of resblocks in decoder，这里选择9是因为netG参数是resnet_9blocks
+                'nres_dec': 1,  # number of resblocks in decoder，这里选择9是因为netG参数是resnet_9blocks
                 'c_s': 20,  # sequence code length
-                'c_w': 5,  # hyperconv weight length
+                'c_w': 8,  # hyperconv weight length
                 'norm': 'InstanceNorm',  # 因为norm参数为instance
                 'c_enc': [64, 128, 256]  # 因为最后一个256需要和encoder/resnet的输出一致
             }
@@ -401,6 +401,8 @@ class ResnetGenerator(nn.Module):
         """Standard forward"""
         # return self.model(input)
         output = self.encoder(input)
+        print(output.shape)
+        print("***************")
         s = self.style_fc(s)
         return self.decoder(output, s)
 

@@ -38,7 +38,14 @@ class hyperConv(nn.Module):
         self.conv = getattr(F, 'conv%dd' % self.ndims)  # 如果 'self.ndims' 的值是 2，那么 'conv%dd' % self.ndims 就会变成 'conv2d'
 
     def forward(self, x, s):    # x: input feature maps; s: target sequence code;
-        kernel = torch.matmul(self.param, self.fc(s).view(self.weight_dim, 1)).view(*self.kshape)
+        print("x.shape: ", x.shape)
+        print("s.shape: ", s.shape)
+        print("fc(s).shape: ", self.fc(s).shape)
+        print("weight dim: ", self.weight_dim)
+        print("param.shape: ", self.param.shape)
+        print(self.fc(s).view(self.weight_dim*self.weight_dim, 1).shape)
+        kernel = torch.matmul(self.param, self.fc(s).view(self.weight_dim*self.weight_dim, 1)).view(*self.kshape)
+        print('++++++++++++++++++++++++++++++++++++++')
         if self.bias is True:
             bias = torch.matmul(self.b, self.fc_bias(s).view(self.weight_dim, 1)).view(self.dim_out)
             return self.conv(x, weight=kernel, bias=bias, stride=self.stride, padding=self.padding)
@@ -102,6 +109,10 @@ class hyperResnetBlock(nn.Module):
         """Forward function (with skip connections)"""
         y = self.norm1(self.conv1(self.pad1(x), s))
         y = self.norm2(self.conv2(self.pad2(y), s))
+        # 
+        print("--------------------")
+        print(x.shape, y.shape)
+        print("--------------------")
         out = x + y  # add skip connections
         return out
 
