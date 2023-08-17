@@ -381,7 +381,7 @@ class ResnetGenerator(nn.Module):
                 's_dec': [2, 2, 1],  # strides for decoder
                 'nres_dec': 1,  # number of resblocks in decoder，这里选择9是因为netG参数是resnet_9blocks
                 'c_s': 20,  # sequence code length
-                'c_w': 8,  # hyperconv weight length
+                'c_w': 20,  # hyperconv weight length
                 'norm': 'InstanceNorm',  # 因为norm参数为instance
                 'c_enc': [64, 128, 256]  # 因为最后一个256需要和encoder/resnet的输出一致
             }

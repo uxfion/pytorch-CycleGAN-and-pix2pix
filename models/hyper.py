@@ -38,13 +38,14 @@ class hyperConv(nn.Module):
         self.conv = getattr(F, 'conv%dd' % self.ndims)  # 如果 'self.ndims' 的值是 2，那么 'conv%dd' % self.ndims 就会变成 'conv2d'
 
     def forward(self, x, s):    # x: input feature maps; s: target sequence code;
-        print("x.shape: ", x.shape)
-        print("s.shape: ", s.shape)
-        print("fc(s).shape: ", self.fc(s).shape)
-        print("weight dim: ", self.weight_dim)
-        print("param.shape: ", self.param.shape)
-        print(self.fc(s).view(self.weight_dim*self.weight_dim, 1).shape)
-        kernel = torch.matmul(self.param, self.fc(s).view(self.weight_dim*self.weight_dim, 1)).view(*self.kshape)
+        print("x.shape: ", x.shape)     # [4, 256, 66, 66]
+        print("s.shape: ", s.shape)     # [4, 20]
+        print("fc(s).shape: ", self.fc(s).shape)    # [4, 8]
+        print("weight dim: ", self.weight_dim)      # 8
+        print("param.shape: ", self.param.shape)    # [256, 256, 3, 3, 8]
+        print("bias: ", self.bias)
+        print(self.fc(s).view(self.weight_dim, 1).shape)
+        kernel = torch.matmul(self.param, self.fc(s).view(self.weight_dim, 1)).view(*self.kshape)
         print('++++++++++++++++++++++++++++++++++++++')
         if self.bias is True:
             bias = torch.matmul(self.b, self.fc_bias(s).view(self.weight_dim, 1)).view(self.dim_out)
@@ -107,7 +108,7 @@ class hyperResnetBlock(nn.Module):
 
     def forward(self, x, s):
         """Forward function (with skip connections)"""
-        y = self.norm1(self.conv1(self.pad1(x), s))
+        y = self.norm1(self.conv1(self.pad1(x), s))     #######
         y = self.norm2(self.conv2(self.pad2(y), s))
         # 
         print("--------------------")
