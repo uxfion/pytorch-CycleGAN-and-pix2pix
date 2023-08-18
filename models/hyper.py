@@ -38,15 +38,15 @@ class hyperConv(nn.Module):
         self.conv = getattr(F, 'conv%dd' % self.ndims)  # 如果 'self.ndims' 的值是 2，那么 'conv%dd' % self.ndims 就会变成 'conv2d'
 
     def forward(self, x, s):    # x: input feature maps; s: target sequence code;
-        print("x.shape: ", x.shape)     # [4, 256, 66, 66]
-        print("s.shape: ", s.shape)     # [4, 20]
-        print("fc(s).shape: ", self.fc(s).shape)    # [4, 8]
-        print("weight dim: ", self.weight_dim)      # 8
-        print("param.shape: ", self.param.shape)    # [256, 256, 3, 3, 8]
-        print("bias: ", self.bias)
-        print(self.fc(s).view(self.weight_dim, 1).shape)
+        # print("x.shape: ", x.shape)     # [4, 256, 66, 66]
+        # print("s.shape: ", s.shape)     # [4, 20]
+        # print("fc(s).shape: ", self.fc(s).shape)    # [4, 8]
+        # print("weight dim: ", self.weight_dim)      # 8
+        # print("param.shape: ", self.param.shape)    # [256, 256, 3, 3, 8]
+        # print("bias: ", self.bias)
+        # print(self.fc(s).view(self.weight_dim, 1).shape)
         kernel = torch.matmul(self.param, self.fc(s).view(self.weight_dim, 1)).view(*self.kshape)
-        print('++++++++++++++++++++++++++++++++++++++')
+        # print('++++++++++++++++++++++++++++++++++++++')
         if self.bias is True:
             bias = torch.matmul(self.b, self.fc_bias(s).view(self.weight_dim, 1)).view(self.dim_out)
             return self.conv(x, weight=kernel, bias=bias, stride=self.stride, padding=self.padding)
@@ -111,9 +111,9 @@ class hyperResnetBlock(nn.Module):
         y = self.norm1(self.conv1(self.pad1(x), s))     #######
         y = self.norm2(self.conv2(self.pad2(y), s))
         # 
-        print("--------------------")
-        print(x.shape, y.shape)
-        print("--------------------")
+        # print("--------------------")
+        # print(x.shape, y.shape)
+        # print("--------------------")
         out = x + y  # add skip connections
         return out
 
@@ -169,5 +169,10 @@ class hyperDecoder(nn.Module):
             x = self.up(x)
             x = norm(conv(pad(x), s))
 
+        # print(f"hyper decoder input x: {x.shape}")
+
         x = self.act_last(self.conv_last(self.pad_last(x), s))
+
+        # print(f"hyper decoder output x: {x.shape}")
+
         return x

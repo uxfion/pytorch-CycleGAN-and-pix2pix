@@ -197,9 +197,8 @@ class MyCycleGANModel(BaseModel):
         # self.rec_B = self.netG_A(self.fake_A)   # G_A(G_B(B))
 
         self.fake_B = self.netG_A(self.real_A, self.target_code)  # G_A(A)
-        print(f"self.real_A.shape: {self.real_A.shape}")
-        print(f"self.fake_B.shape: {self.fake_B.shape}")
-        exit()
+        # print(f"self.real_A.shape: {self.real_A.shape}")
+        # print(f"self.fake_B.shape: {self.fake_B.shape}")
 
         self.rec_A = self.netG_B(self.fake_B, self.target_code)   # G_B(G_A(A))
         self.fake_A = self.netG_B(self.real_B, self.target_code)  # G_B(B)
@@ -263,14 +262,12 @@ class MyCycleGANModel(BaseModel):
             # G_A should be identity if real_B is fed: ||G_A(B) - B||
             # real_B_idt_ext = self.add_dim(self.real_B, 0.0)
             self.idt_A = self.netG_A(self.real_B, self.target_code)
-            # self.loss_idt_A = self.criterionIdt(self.idt_A, self.real_B) * lambda_B * lambda_idt * 0
-            self.loss_idt_A = 0
+            self.loss_idt_A = self.criterionIdt(self.idt_A, self.real_B) * lambda_B * lambda_idt * 0
 
             # G_B should be identity if real_A is fed: ||G_B(A) - A||
             # real_A_idt_ext = self.add_dim(self.real_A, 0.0)
             self.idt_B = self.netG_B(self.real_A, self.target_code)
-            # self.loss_idt_B = self.criterionIdt(self.idt_B, self.real_A) * lambda_A * lambda_idt * 0
-            self.loss_idt_B = 0
+            self.loss_idt_B = self.criterionIdt(self.idt_B, self.real_A) * lambda_A * lambda_idt * 0
         else:
             self.loss_idt_A = 0
             self.loss_idt_B = 0
@@ -280,8 +277,6 @@ class MyCycleGANModel(BaseModel):
         # GAN loss D_B(G_B(B))
         self.loss_G_B = self.criterionGAN(self.netD_B(self.fake_A), True)
         # Forward cycle loss || G_B(G_A(A)) - A||
-        print(f"self.rec_A.shape: {self.rec_A.shape}")
-        print(f"self.real_A.shape: {self.real_A.shape}")
         self.loss_cycle_A = self.criterionCycle(self.rec_A, self.real_A) * lambda_A
         # Backward cycle loss || G_A(G_B(B)) - B||
         self.loss_cycle_B = self.criterionCycle(self.rec_B, self.real_B) * lambda_B

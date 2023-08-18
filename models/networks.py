@@ -378,8 +378,8 @@ class ResnetGenerator(nn.Module):
                 'ndims': 2,     # 对应 nn.Conv2d
                 'c_dec': [128, 64, 3],  # channels for decoder
                 'k_dec': [3, 3, 7],  # ksize for decoder
-                's_dec': [2, 2, 1],  # strides for decoder
-                'nres_dec': 1,  # number of resblocks in decoder，这里选择9是因为netG参数是resnet_9blocks
+                's_dec': [1, 1, 1],  # strides for decoder
+                'nres_dec': 9,  # number of resblocks in decoder，这里选择9是因为netG参数是resnet_9blocks
                 'c_s': 20,  # sequence code length
                 'c_w': 20,  # hyperconv weight length
                 'norm': 'InstanceNorm',  # 因为norm参数为instance
@@ -401,10 +401,12 @@ class ResnetGenerator(nn.Module):
         """Standard forward"""
         # return self.model(input)
         output = self.encoder(input)
-        print(output.shape)
-        print("***************")
+        # print(f"G encoder output: {output.shape}")
         s = self.style_fc(s)
-        return self.decoder(output, s)
+        # print(f"G s: {s.shape}")
+        ret = self.decoder(output, s)
+        # print(f"G decoder output: {ret.shape}")
+        return ret
 
 
 class ResnetBlock(nn.Module):
