@@ -43,7 +43,7 @@ class MyTestModel(BaseModel):
         self.visual_names = ['real', 'fake']
         # specify the models you want to save to the disk. The training/test scripts will call <BaseModel.save_networks> and <BaseModel.load_networks>
         self.model_names = ['G' + opt.model_suffix]  # only generator is needed.
-        self.netG = networks.define_G(4, 3, opt.ngf, opt.netG,
+        self.netG = networks.define_G(3, 3, opt.ngf, opt.netG,
                                       opt.norm, not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids)
 
         # assigns the model to self.netG_[suffix] so that it can be loaded
@@ -71,8 +71,13 @@ class MyTestModel(BaseModel):
 
     def forward(self, sigma):
         """Run forward pass."""
-        real_ext = self.add_dim(self.real, sigma/50.0)
-        self.fake = self.netG(real_ext)  # G(real)
+        # real_ext = self.add_dim(self.real, sigma/50.0)
+        # print(f"sigma: {sigma}")
+        target_code = torch.zeros((1, 20))
+        target_code[0, sigma] = 1
+        target_code = target_code.to(self.device)
+        # print(f"target_code: {target_code}")
+        self.fake = self.netG(self.real,target_code)  # G(real)
 
     def optimize_parameters(self):
         """No optimization for test model."""
