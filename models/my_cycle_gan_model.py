@@ -162,6 +162,44 @@ class MyCycleGANModel(BaseModel):
         # print("****output:", output.shape, '\n', output)
         return output
 
+    def mapped(self, tensor1, tensor2):
+        batch_size, _, _, _ = tensor1.shape
+        result = []
+
+        for i in range(batch_size):
+            img1 = tensor1[i]
+            img2 = tensor2[i]
+
+            img1_r, img1_g, img1_b = img1.unbind(0)
+            img2_r, img2_g, img2_b = img2.unbind(0)
+
+            img2_r = self.mapped_single_channel(img1_r, img2_r)
+            img2_g = self.mapped_single_channel(img1_g, img2_g)
+            img2_b = self.mapped_single_channel(img1_b, img2_b)
+
+            img2 = torch.stack((img2_r, img2_g, img2_b))
+            result.append(img2)
+
+        result = torch.stack(result)
+
+        return result
+
+    def mapped_single_channel(self, tensor1, tensor2):
+        tensor1_pixels = tensor1.view(-1)
+        tensor2_pixels = tensor2.view(-1)
+
+        tensor1_low = tensor1_pixels.kthvalue(int(len(tensor1_pixels) * 0.05)).values.item()
+        tensor1_high = tensor1_pixels.kthvalue(int(len(tensor1_pixels) * 0.95)).values.item()
+        tensor2_low = tensor2_pixels.kthvalue(int(len(tensor2_pixels) * 0.05)).values.item()
+        tensor2_high = tensor2_pixels.kthvalue(int(len(tensor2_pixels) * 0.95)).values.item()
+
+        scale_factor = ((tensor2 - tensor2_low) / (tensor2_high - tensor2_low)) * (
+                    tensor1_high - tensor1_low) + tensor1_low
+        scale_factor = torch.clamp(scale_factor, 0, 255)
+
+        return scale_factor
+
+
     def set_input(self, input):
         """Unpack input data from the dataloader and perform necessary pre-processing steps.
 
@@ -197,9 +235,10 @@ class MyCycleGANModel(BaseModel):
         # self.rec_B = self.netG_A(self.fake_A)   # G_A(G_B(B))
 
         self.fake_B = self.netG_A(self.real_A, self.target_code)  # G_A(A)
-        # print(f"self.real_A.shape: {self.real_A.shape}")
-        # print(f"self.fake_B.shape: {self.fake_B.shape}")
-
+        print(f"self.real_A.shape: {self.real_A.shape}")
+        print(f"self.fake_B.shape: {self.fake_B.shape}")
+        self.fake_B = self.mapped(self.real_A, self.fake_B)
+        exit()
         self.rec_A = self.netG_B(self.fake_B, self.target_code)   # G_B(G_A(A))
         self.fake_A = self.netG_B(self.real_B, self.target_code)  # G_B(B)
         self.rec_B = self.netG_A(self.fake_A, self.target_code)   # G_A(G_B(B))

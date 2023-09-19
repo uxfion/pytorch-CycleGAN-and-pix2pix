@@ -93,13 +93,13 @@ if __name__ == '__main__':
             img_path = model.get_image_paths()     # get image paths
             img_path_with_sigma = [os.path.splitext(path)[0] + f"_sigma{sigma}" + os.path.splitext(path)[1] for path in img_path]
 
-            # print(img_path_with_sigma)
-            for j, path in enumerate(img_path_with_sigma):
-                print(path)
-                if 'ultrasound' in path:
-                    print('ultrasound')
-                    for key in visuals.keys():
-                        visuals[key][j] = rgb2gray(visuals[key][j])
+            # # print(img_path_with_sigma)
+            # for j, path in enumerate(img_path_with_sigma):
+            #     print(path)
+            #     if 'ultrasound' in path:
+            #         print('ultrasound')
+            #         for key in visuals.keys():
+            #             visuals[key][j] = rgb2gray(visuals[key][j])
 
 
             print('processing (%04d)-th image... %s' % (i, img_path_with_sigma))
