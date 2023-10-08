@@ -62,7 +62,7 @@ class MyAlignedDataset(BaseDataset):
         A = AB.filter(ImageFilter.GaussianBlur(radius=n_A))
         B = AB.filter(ImageFilter.GaussianBlur(radius=n_B))
 
-        A = self.mapped(B, A)
+        # A = self.mapped(B, A)
 
         # apply the same transform to both A and B
         transform_params = get_params(self.opt, A.size)
