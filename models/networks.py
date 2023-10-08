@@ -400,12 +400,14 @@ class ResnetGenerator(nn.Module):
     def forward(self, input, s):
         """Standard forward"""
         # return self.model(input)
+        # print(f"ResnetGenerator input shape: {input.shape}")
+        # print(f"ResnetGenerator s shape: {s.shape}")
         output = self.encoder(input)
-        # print(f"G encoder output: {output.shape}")
+        # print(f"ResnetGenerator output shape: {output.shape}")
         s = self.style_fc(s)
-        # print(f"G s: {s.shape}")
+        # print(f"ResnetGenerator s shape: {s.shape}")
         ret = self.decoder(output, s)
-        # print(f"G decoder output: {ret.shape}")
+        # print(f"ResnetGenerator decoder output: {ret.shape}")
         return ret
 
 

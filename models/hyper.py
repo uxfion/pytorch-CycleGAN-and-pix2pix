@@ -38,20 +38,36 @@ class hyperConv(nn.Module):
         self.conv = getattr(F, 'conv%dd' % self.ndims)  # 如果 'self.ndims' 的值是 2，那么 'conv%dd' % self.ndims 就会变成 'conv2d'
 
     def forward(self, x, s):    # x: input feature maps; s: target sequence code;
-        # print("x.shape: ", x.shape)     # [4, 256, 66, 66]
-        # print("s.shape: ", s.shape)     # [4, 20]
-        # print("fc(s).shape: ", self.fc(s).shape)    # [4, 8]
-        # print("weight dim: ", self.weight_dim)      # 8
-        # print("param.shape: ", self.param.shape)    # [256, 256, 3, 3, 8]
-        # print("bias: ", self.bias)
-        # print(self.fc(s).view(self.weight_dim, 1).shape)
-        kernel = torch.matmul(self.param, self.fc(s).view(self.weight_dim, 1)).view(*self.kshape)
-        # print('++++++++++++++++++++++++++++++++++++++')
-        if self.bias is True:
-            bias = torch.matmul(self.b, self.fc_bias(s).view(self.weight_dim, 1)).view(self.dim_out)
-            return self.conv(x, weight=kernel, bias=bias, stride=self.stride, padding=self.padding)
+        # print(f"hyperConv x.shape: {x.shape}")
+        # print(f"hyperConv s.shape: {s.shape}")
+        # print(f"hyperConv self.fc(s).shape: {self.fc(s).shape}")
+        # print(f"hyperConv self.fc(s).view(self.weight_dim, 1).shape: {self.fc(s).view(self.weight_dim, 1).shape}")
+        # print(f"hyperConv self.param: {self.fc(s).shape}")
+        # kernel = torch.matmul(self.param, self.fc(s).view(self.weight_dim, 1)).view(*self.kshape)
+        # if self.bias is True:
+        #     bias = torch.matmul(self.b, self.fc_bias(s).view(self.weight_dim, 1)).view(self.dim_out)
+        #     return self.conv(x, weight=kernel, bias=bias, stride=self.stride, padding=self.padding)
+        # else:
+        #     return self.conv(x, weight=kernel, stride=self.stride, padding=self.padding)
+
+        batch_size = x.size(0)
+        # 为每个样本生成权重
+        kernels = [torch.matmul(self.param, self.fc(s[i]).view(self.weight_dim, 1)).view(*self.kshape) for i in
+                   range(batch_size)]
+        kernels = torch.stack(kernels, 0)
+
+        # 如果有偏置，为每个样本生成偏置
+        if self.bias:
+            biases = [torch.matmul(self.b, self.fc_bias(s[i]).view(self.weight_dim, 1)).view(self.dim_out) for i in
+                      range(batch_size)]
+            biases = torch.stack(biases, 0)
         else:
-            return self.conv(x, weight=kernel, stride=self.stride, padding=self.padding)
+            biases = [None] * batch_size
+
+        # 为每个样本单独执行卷积操作
+        outputs = [self.conv(x[i:i + 1], weight=kernels[i], bias=biases[i], stride=self.stride, padding=self.padding)
+                   for i in range(batch_size)]
+        return torch.cat(outputs, 0)
 
 
 class hyperResnetBlock(nn.Module):
@@ -108,6 +124,10 @@ class hyperResnetBlock(nn.Module):
 
     def forward(self, x, s):
         """Forward function (with skip connections)"""
+        # print("hyperResnetBlock x.shape: ", x.shape)
+        # print("hyperResnetBlock s.shape: ", s.shape)
+        # print(f"self.pad1(x).shape: {self.pad1(x).shape}")
+        # print(f"self.conv1(self.pad1(x), s).shape: {self.conv1(self.pad1(x), s).shape}")
         y = self.norm1(self.conv1(self.pad1(x), s))     #######
         y = self.norm2(self.conv2(self.pad2(y), s))
         # 
@@ -162,8 +182,14 @@ class hyperDecoder(nn.Module):
         self.act_last = nn.Tanh()
 
     def forward(self, x, s):
+        # print(f"hyperDecoder x shape: {x.shape}")
+        # print(f"hyperDecoder s shape: {s.shape}")
+
         for res in self.res:
             x = res(x, s)
+
+        # print(f"hyperDecoder for res in self.res out x shape: {x.shape}")
+
 
         for pad, conv, norm in zip(self.pads, self.convs, self.norms):
             x = self.up(x)
