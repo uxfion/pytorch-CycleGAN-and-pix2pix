@@ -9,8 +9,10 @@ from models import create_model
 from options.test_options import TestOptions
 import numpy as np
 
-# @st.cache(allow_output_mutation=True)
+model = None
 def load_model():
+    global model
+
     opt = TestOptions().parse()
     opt.num_threads = 0
     opt.batch_size = 1
@@ -24,7 +26,6 @@ def load_model():
     # opt.no_dropout=True
     # opt.preprocess="none"
     # opt.gpu_ids=[1]
-
 
     # Load the model
     model = create_model(opt)  # You need to set up the `opt` object appropriately
@@ -97,9 +98,11 @@ def improve_image_quality(image, model, parameter):
 
     return improved_image
 
+if not model:
+    print("Loading model...")
+    model = load_model()
 
 # ========== web ==========================
-model = load_model()
 # Set page config to make the layout use the full page width
 st.set_page_config(layout="wide")
 
@@ -114,7 +117,7 @@ with col1:
 
 # Dropdown for model selection
 with col2:
-    model_select = st.selectbox('Model select', ['Model 1', 'Model 2', 'Model 3'])
+    model_select = st.selectbox('Model select', ['CycleGAN', 'Model 2', 'Model 3'])
 
 parameter_col, button_col = st.columns(2)
 with parameter_col:
