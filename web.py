@@ -82,6 +82,14 @@ opt.serial_batches = True
 opt.no_flip = True
 opt.display_id = -1
 
+# opt.dataroot="./datasets/xijing/low_quality"
+# opt.name="ultrasound_2023_10_10_batch5"
+# opt.model="my_test"
+# opt.no_dropout=True
+# opt.preprocess="none"
+# opt.gpu_ids=[1]
+
+
 # Load the model
 model = create_model(opt)  # You need to set up the `opt` object appropriately
 model.setup(opt)
@@ -102,7 +110,7 @@ with col1:
 
 # Dropdown for model selection
 with col2:
-    model = st.selectbox('Model select', ['Model 1', 'Model 2', 'Model 3'])
+    model_select = st.selectbox('Model select', ['Model 1', 'Model 2', 'Model 3'])
 
 parameter_col, button_col = st.columns(2)
 with parameter_col:
