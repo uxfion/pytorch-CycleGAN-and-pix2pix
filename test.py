@@ -52,6 +52,7 @@ def rgb2gray(rgb):
 if __name__ == '__main__':
 
     sigma_values = [0,2,4,8,10,19]
+    # sigma_values = [0,2,4,6,8,10]
 
     opt = TestOptions().parse()  # get test options
     # hard-code some parameters for test
