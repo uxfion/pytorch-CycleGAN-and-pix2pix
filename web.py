@@ -9,6 +9,28 @@ from models import create_model
 from options.test_options import TestOptions
 import numpy as np
 
+# @st.cache(allow_output_mutation=True)
+def load_model():
+    opt = TestOptions().parse()
+    opt.num_threads = 0
+    opt.batch_size = 1
+    opt.serial_batches = True
+    opt.no_flip = True
+    opt.display_id = -1
+
+    # opt.dataroot="./datasets/xijing/low_quality"
+    # opt.name="ultrasound_2023_10_10_batch5"
+    # opt.model="my_test"
+    # opt.no_dropout=True
+    # opt.preprocess="none"
+    # opt.gpu_ids=[1]
+
+
+    # Load the model
+    model = create_model(opt)  # You need to set up the `opt` object appropriately
+    model.setup(opt)
+    model.eval()
+    return model
 
 # 调整第二张图像img2的亮度和对比度，使其与第一张图像img1相似。
 def mapped(img1, img2):
@@ -75,27 +97,9 @@ def improve_image_quality(image, model, parameter):
 
     return improved_image
 
-opt = TestOptions().parse()
-opt.num_threads = 0
-opt.batch_size = 1
-opt.serial_batches = True
-opt.no_flip = True
-opt.display_id = -1
-
-# opt.dataroot="./datasets/xijing/low_quality"
-# opt.name="ultrasound_2023_10_10_batch5"
-# opt.model="my_test"
-# opt.no_dropout=True
-# opt.preprocess="none"
-# opt.gpu_ids=[1]
-
-
-# Load the model
-model = create_model(opt)  # You need to set up the `opt` object appropriately
-model.setup(opt)
-model.eval()
 
 # ========== web ==========================
+model = load_model()
 # Set page config to make the layout use the full page width
 st.set_page_config(layout="wide")
 
