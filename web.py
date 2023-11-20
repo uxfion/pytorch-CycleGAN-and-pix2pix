@@ -9,7 +9,14 @@ from models import create_model
 from options.test_options import TestOptions
 import numpy as np
 
+import datetime
+
+# Set page config to make the layout use the full page width
+st.set_page_config(layout="wide")
+
+
 model = None
+@st.cache_resource
 def load_model():
     global model
 
@@ -32,6 +39,12 @@ def load_model():
     model.setup(opt)
     model.eval()
     return model
+
+model = load_model()
+# if not model:
+#     print("Loading model...")
+#     model = load_model()
+
 
 # 调整第二张图像img2的亮度和对比度，使其与第一张图像img1相似。
 def mapped(img1, img2):
@@ -98,13 +111,8 @@ def improve_image_quality(image, model, parameter):
 
     return improved_image
 
-if not model:
-    print("Loading model...")
-    model = load_model()
 
 # ========== web ==========================
-# Set page config to make the layout use the full page width
-st.set_page_config(layout="wide")
 
 # Title of the webpage
 st.title('Image Quality Improvement of Mobile Ultrasound Devices')
@@ -138,7 +146,13 @@ if infer_button:
 
         # Improve image quality
         # improved_image = improve_image_quality(image, model, parameter)
+        print(f"{datetime.datetime.now()} 推理中...")
+        print("图像信息")
+        print(f"  - 尺寸: {image.size}")
+        print(f"  - 格式: {image.format}")
+        print(f"  - exif: {image.getexif()}")
         improved_image = infer(model, image, parameter)
+        print(f"\n{datetime.datetime.now()} 推理完成\n\n\n")
 
         # Display the image after improvement
         with col2:
