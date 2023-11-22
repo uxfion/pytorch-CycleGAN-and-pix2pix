@@ -11,6 +11,7 @@ import numpy as np
 
 import datetime
 
+
 # Set page config to make the layout use the full page width
 st.set_page_config(layout="wide")
 
@@ -45,6 +46,20 @@ model = load_model()
 #     print("Loading model...")
 #     model = load_model()
 
+def crop_to_divisible_by_four(img):
+    # Check if dimensions are already divisible by 4
+    if img.width % 4 == 0 and img.height % 4 == 0:
+        return img
+
+    print(f"图像尺寸{img.size}不能被4整除, 裁剪图像至能被4整除...")
+    # Calculate the new dimensions
+    new_width = img.width - (img.width % 4)
+    new_height = img.height - (img.height % 4)
+    print(f"裁剪后图像尺寸: {new_width} x {new_height}")
+    # Crop the image
+    cropped_img = img.crop((0, 0, new_width, new_height))
+
+    return cropped_img
 
 # 调整第二张图像img2的亮度和对比度，使其与第一张图像img1相似。
 def mapped(img1, img2):
@@ -79,8 +94,10 @@ def mapped_single_channel(img1, img2):
 
 # Function to perform inference
 def infer(model, image_raw, sigma):
+    # image_raw = crop_to_divisible_by_four(image_raw)
     # Apply necessary transformations
     transform = transforms.Compose([
+        # transforms.Lambda(lambda img: __make_power_2(img, base=4)),
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
@@ -125,7 +142,7 @@ with col1:
 
 # Dropdown for model selection
 with col2:
-    model_select = st.selectbox('Model select', ['CycleGAN', 'Model 2', 'Model 3'])
+    model_select = st.selectbox('Model select', ['Super-Resolution Model', 'Model 2', 'Model 3'])
 
 parameter_col, button_col = st.columns(2)
 with parameter_col:
@@ -137,7 +154,7 @@ with button_col:
 if infer_button:
     if uploaded_file is not None:
         # Open the uploaded image file
-        image = Image.open(uploaded_file)
+        image = Image.open(uploaded_file).convert('RGB')
 
         # Use Streamlit's columns feature to display images side by side
         col1, col2 = st.columns(2)
