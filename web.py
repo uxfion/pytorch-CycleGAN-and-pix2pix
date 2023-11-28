@@ -1,9 +1,7 @@
 import streamlit as st
 from PIL import Image, ImageFilter
 import io
-
 import torch
-from PIL import Image
 from torchvision import transforms
 from models import create_model
 from options.test_options import TestOptions
@@ -11,12 +9,12 @@ import numpy as np
 
 import datetime
 
-
 # Set page config to make the layout use the full page width
 st.set_page_config(layout="wide")
 
-
 model = None
+
+
 @st.cache_resource
 def load_model():
     global model
@@ -36,15 +34,17 @@ def load_model():
     # opt.gpu_ids=[1]
 
     # Load the model
-    model = create_model(opt)  # You need to set up the `opt` object appropriately
+    model = create_model(opt)
     model.setup(opt)
     model.eval()
     return model
+
 
 model = load_model()
 # if not model:
 #     print("Loading model...")
 #     model = load_model()
+
 
 def crop_to_divisible_by_four(img):
     # Check if dimensions are already divisible by 4
@@ -60,6 +60,7 @@ def crop_to_divisible_by_four(img):
     cropped_img = img.crop((0, 0, new_width, new_height))
 
     return cropped_img
+
 
 # 调整第二张图像img2的亮度和对比度，使其与第一张图像img1相似。
 def mapped(img1, img2):
@@ -77,6 +78,7 @@ def mapped(img1, img2):
 
     return img2
 
+
 def mapped_single_channel(img1, img2):
     img1_pixels = np.sort(np.array(img1).flatten())
     img2_pixels = np.sort(np.array(img2).flatten())
@@ -92,6 +94,7 @@ def mapped_single_channel(img1, img2):
 
     return Image.fromarray(scale_factor.astype(np.uint8))
 
+
 # Function to perform inference
 def infer(model, image_raw, sigma):
     # image_raw = crop_to_divisible_by_four(image_raw)
@@ -102,7 +105,6 @@ def infer(model, image_raw, sigma):
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
     image = transform(image_raw).unsqueeze(0)
-
 
     # Perform inference
     with torch.no_grad():
@@ -115,10 +117,10 @@ def infer(model, image_raw, sigma):
     fake_image = (fake_image.cpu().squeeze(0) + 1) / 2  # Denormalize
     fake_image = transforms.ToPILImage()(fake_image)
 
-
     contrast_image = mapped(image_raw, fake_image)
 
     return contrast_image
+
 
 # Dummy function for image quality improvement (replace with your actual model inference)
 def improve_image_quality(image, model, parameter):
@@ -174,7 +176,7 @@ if infer_button:
         # Display the image after improvement
         with col2:
             st.image(improved_image, caption='Image after infer', use_column_width=True)
-        
+
         # Download button
         buf = io.BytesIO()
         improved_image.save(buf, format="PNG")
@@ -185,4 +187,3 @@ if infer_button:
                            mime="image/png")
     else:
         st.error("Please upload an image to infer.")
-
