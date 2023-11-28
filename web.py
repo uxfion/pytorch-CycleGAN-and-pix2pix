@@ -1,4 +1,6 @@
 import streamlit as st
+import random
+import os
 import io
 import datetime
 from PIL import Image, ImageFilter
@@ -33,6 +35,14 @@ def test_infer(model, image, parameter):
     return improved_image
 
 
+def random_image_from_folder(folder_path):
+    """ 随机从指定文件夹中选择一张图片 """
+    files = os.listdir(folder_path)
+    random_file = random.choice(files)
+    image_path = os.path.join(folder_path, random_file)
+    return image_path
+
+
 # ========== web ==========================
 # Title of the webpage
 st.title('Image Quality Improvement of Mobile Ultrasound Devices')
@@ -51,10 +61,22 @@ parameter_col, button_col = st.columns(2)
 with parameter_col:
     parameter = st.slider('Select parameter', 2, 14, step=2, value=8)
 with button_col:
-    infer_button = st.button('Infer')
+    demo_col, infer_col, _ = st.columns(3)
+    with demo_col:
+        demo_button = st.button('Demo')
+    with infer_col:
+        infer_button = st.button('Infer')
+
+if demo_button:
+    demo_file = random_image_from_folder('./datasets/xijing/low_quality/')  # 随机选择图片
+    st.session_state['demo_image'] = demo_file
+    st.write(f"Pick a random image: {demo_file}")
+    st.image(demo_file, caption='Random image', width=200)
+
 
 # Button to perform inference
 if infer_button:
+    uploaded_file = st.session_state.get('demo_image', uploaded_file)
     if uploaded_file is not None:
         # Open the uploaded image file
         image = Image.open(uploaded_file).convert('RGB')
