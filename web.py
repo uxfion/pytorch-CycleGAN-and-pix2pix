@@ -51,7 +51,7 @@ col1, col2 = st.columns(2)
 
 # File uploader allows the user to add their own image
 with col1:
-    uploaded_file = st.file_uploader("Upload", type=["png", "jpg", "jpeg"])
+    uploaded_file = st.file_uploader("Upload Image", type=["png", "jpg", "jpeg"])
 
 # Dropdown for model selection
 with col2:
@@ -59,9 +59,9 @@ with col2:
 
 parameter_col, button_col = st.columns(2)
 with parameter_col:
-    parameter = st.slider('Select parameter', 2, 14, step=2, value=8)
+    parameter = st.slider('Select parameter', 1, 14, step=1, value=8)
 with button_col:
-    demo_col, infer_col, _ = st.columns(3)
+    _, demo_col, infer_col, _ = st.columns(4)
     with demo_col:
         demo_button = st.button('Demo')
     with infer_col:
@@ -70,8 +70,8 @@ with button_col:
 if demo_button:
     demo_file = random_image_from_folder('./datasets/xijing/low_quality/')  # 随机选择图片
     st.session_state['demo_image'] = demo_file
-    st.write(f"Pick a random image: {demo_file}")
-    st.image(demo_file, caption='Random image', width=200)
+    st.write(f"Pick a random image: {demo_file.replace('xijing/', '')}")
+    st.image(demo_file, caption='Random image', width=250)
 
 
 # Button to perform inference
