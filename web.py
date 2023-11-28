@@ -85,13 +85,15 @@ if infer_button:
         if isinstance(uploaded_file, str):
             image = Image.open(uploaded_file).convert('RGB')
         else:
-            # 如果是文件对象
+            # 保存上传文件
+            content = uploaded_file.getvalue()
+            file_path = f"./results/_upload_file/{uploaded_file.name}"
+            with open(file_path, "wb") as f:
+                f.write(content)
+            print(f"{datetime.datetime.now()} 保存上传文件成功: {file_path}")
+
             if uploaded_file.type == "application/dicom":
                 # 处理DICOM文件
-                content = uploaded_file.getvalue()
-                file_path = f"./dicom/{uploaded_file.name}"
-                with open(file_path, "wb") as f:
-                    f.write(content)
                 sitk_image = sitk.ReadImage(file_path)
                 img_array = sitk.GetArrayFromImage(sitk_image)
                 img_array = img_array[0] if img_array.ndim == 3 else img_array
