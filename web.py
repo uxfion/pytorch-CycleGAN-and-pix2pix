@@ -4,6 +4,7 @@ import os
 import io
 import datetime
 from PIL import Image, ImageFilter
+import SimpleITK as sitk
 
 from cyclegan_infer import load_cyclegan_model, cyclegan_infer
 
@@ -51,7 +52,7 @@ col1, col2 = st.columns(2)
 
 # File uploader allows the user to add their own image
 with col1:
-    uploaded_file = st.file_uploader("Upload Image", type=["png", "jpg", "jpeg"])
+    uploaded_file = st.file_uploader("Upload Image or DICOM", type=["png", "jpg", "jpeg", "dcm"])
 
 # Dropdown for model selection
 with col2:
@@ -79,7 +80,25 @@ if infer_button:
     uploaded_file = st.session_state.get('demo_image', uploaded_file)
     if uploaded_file is not None:
         # Open the uploaded image file
-        image = Image.open(uploaded_file).convert('RGB')
+        # image = Image.open(uploaded_file).convert('RGB')
+
+        if isinstance(uploaded_file, str):
+            image = Image.open(uploaded_file).convert('RGB')
+        else:
+            # 如果是文件对象
+            if uploaded_file.type == "application/dicom":
+                # 处理DICOM文件
+                content = uploaded_file.getvalue()
+                file_path = f"./dicom/{uploaded_file.name}"
+                with open(file_path, "wb") as f:
+                    f.write(content)
+                sitk_image = sitk.ReadImage(file_path)
+                img_array = sitk.GetArrayFromImage(sitk_image)
+                img_array = img_array[0] if img_array.ndim == 3 else img_array
+                image = Image.fromarray(img_array).convert('RGB')
+            else:
+                # 处理常规图像格式
+                image = Image.open(uploaded_file).convert('RGB')
 
         # Use Streamlit's columns feature to display images side by side
         col1, col2 = st.columns(2)
