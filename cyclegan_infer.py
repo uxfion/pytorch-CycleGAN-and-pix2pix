@@ -1,4 +1,3 @@
-import streamlit as st
 import torch
 from torchvision import transforms
 from models import create_model
@@ -7,7 +6,6 @@ import numpy as np
 from PIL import Image
 
 
-@st.cache_resource
 def load_cyclegan_model():
     opt = TestOptions().parse()
     opt.num_threads = 0

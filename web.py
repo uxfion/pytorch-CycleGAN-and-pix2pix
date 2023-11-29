@@ -12,7 +12,12 @@ from cyclegan_infer import load_cyclegan_model, cyclegan_infer
 st.set_page_config(layout="wide")
 
 
-cyclegan_model = load_cyclegan_model()
+@st.cache_resource
+def st_load_cyclegan_model():
+    return load_cyclegan_model()
+
+
+cyclegan_model = st_load_cyclegan_model()
 
 
 # def crop_to_divisible_by_four(img):
