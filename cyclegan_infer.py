@@ -84,5 +84,12 @@ def mapped_single_channel(img1, img2):
     img2_array = np.array(img2, dtype=float)
     scale_factor = ((img2_array - img2_low) / (img2_high - img2_low)) * (img1_high - img1_low) + img1_low
     scale_factor = np.clip(scale_factor, 0, 255, out=scale_factor)
-
+    
     return Image.fromarray(scale_factor.astype(np.uint8))
+
+
+if __name__ == 'main':
+    model = load_cyclegan_model()
+    image_raw = Image.open("./datasets/xijing/low_quality/1-LR.jpg")
+    image_output = cyclegan_infer(model, image_raw, 0)
+    image_output.save("./datasets/xijing/fake/1-LR-0.jpg")
