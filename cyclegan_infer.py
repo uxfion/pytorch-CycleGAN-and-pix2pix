@@ -14,12 +14,12 @@ def load_cyclegan_model():
     opt.no_flip = True
     opt.display_id = -1
 
-    # opt.dataroot="./datasets/xijing/low_quality"
-    # opt.name="ultrasound_2023_10_10_batch5"
-    # opt.model="my_test"
-    # opt.no_dropout=True
-    # opt.preprocess="none"
-    # opt.gpu_ids=[1]
+    opt.dataroot = "./datasets/xijing/low_quality"
+    opt.name = "ultrasound_2023_10_10_batch5"
+    opt.gpu_ids = [1]
+    opt.model = "my_test"
+    opt.no_dropout = True
+    opt.preprocess = "none"
 
     # Load the model
     model = create_model(opt)
