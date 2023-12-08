@@ -5,6 +5,9 @@ from options.test_options import TestOptions
 import numpy as np
 from PIL import Image
 
+import os
+from tqdm import tqdm
+
 
 def load_cyclegan_model():
     opt = TestOptions().parse()
@@ -84,12 +87,22 @@ def mapped_single_channel(img1, img2):
     img2_array = np.array(img2, dtype=float)
     scale_factor = ((img2_array - img2_low) / (img2_high - img2_low)) * (img1_high - img1_low) + img1_low
     scale_factor = np.clip(scale_factor, 0, 255, out=scale_factor)
-    
+
     return Image.fromarray(scale_factor.astype(np.uint8))
 
 
-if __name__ == 'main':
+if __name__ == '__main__':
     model = load_cyclegan_model()
-    image_raw = Image.open("./datasets/xijing/low_quality/1-LR.jpg")
-    image_output = cyclegan_infer(model, image_raw, 0)
-    image_output.save("./datasets/xijing/fake/1-LR-0.jpg")
+    blur = 8
+    clear = 4
+    input_folder = f'./datasets/xijing/Gaussian_{blur}/high_quality_Gaussian_{blur}'  # 输入文件夹路径
+    output_folder = f'./datasets/xijing/Gaussian_{blur}/1111_fake_Gaussian_{clear}'  # 输出文件夹路径
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+    files = [f for f in os.listdir(input_folder) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]  # 获取图片文件列表
+    for filename in tqdm(files, desc="Processing Images"):  # 使用tqdm显示进度
+        input_path = os.path.join(input_folder, filename)
+        output_path = os.path.join(output_folder, filename)
+        image_raw = Image.open(input_path).convert("RGB")
+        image_output = cyclegan_infer(model, image_raw, clear)
+        image_output.save(output_path)
