@@ -92,6 +92,11 @@ def mapped_single_channel(img1, img2):
 
 
 if __name__ == '__main__':
+    # model = load_cyclegan_model()
+    # image_raw = Image.open("./datasets/xijing/low_quality/1-LR.jpg")
+    # image_output = cyclegan_infer(model, image_raw, 0)
+    # image_output.save("./datasets/xijing/fake/1-LR-0.jpg")
+
     model = load_cyclegan_model()
     blur = 8
     clear = 4
