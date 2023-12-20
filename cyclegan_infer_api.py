@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Form, Query
 from fastapi.responses import StreamingResponse
 from PIL import Image
 import io
@@ -12,13 +12,13 @@ model = load_cyclegan_model()
 
 
 @app.post("/process/")
-async def process_image(file: UploadFile = File(...), sigma: int = 4):
+async def process_image(file: UploadFile = File(...), para: int = 4):
     # 读取上传的图片
     contents = await file.read()
     image_raw = Image.open(io.BytesIO(contents)).convert("RGB")
 
     # 使用模型进行处理
-    processed_image = cyclegan_infer(model, image_raw, sigma)
+    processed_image = cyclegan_infer(model, image_raw, para)
 
     # 将处理后的图片转换为字节流
     img_byte_arr = io.BytesIO()
