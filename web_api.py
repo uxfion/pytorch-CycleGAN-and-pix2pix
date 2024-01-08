@@ -30,11 +30,16 @@ with col1:
 
 # Dropdown for model selection
 with col2:
-    model_select = st.selectbox('Model select', ['Super-Resolution Model', 'Model 2', 'Model 3', 'Test'])
+    model_select = st.selectbox('Model select', ['Super-Resolution Model', 'FFDNet Model', 'TaDMMUI Model', 'Test'])
 
 parameter_col, button_col = st.columns(2)
 with parameter_col:
-    parameter = st.slider('Select parameter', 1, 14, step=1, value=8)
+    if model_select == 'Super-Resolution Model':
+        parameter = st.slider('Select parameter', 1, 14, step=1, value=8)
+    elif model_select == 'FFDNet Model':
+        parameter = st.slider('Select parameter', 0.0, 1.0, step=0.1, value=0.8)
+    elif model_select == 'TaDMMUI Model':
+        parameter = -1
 with button_col:
     _, demo_col, infer_col, _ = st.columns(4)
     with demo_col:
@@ -87,10 +92,18 @@ if infer_button:
                 improved_image = Image.open(io.BytesIO(response.content))
             else:
                 st.error("Error processing image.")
-        elif model_select == 'Model 2':
-            response = requests.post("http://127.0.0.1:1111/process/", files=files, params=params)
-        elif model_select == 'Model 3':
-            response = requests.post("http://127.0.0.1:1111/process/", files=files, params=params)
+        elif model_select == 'FFDNet Model':
+            response = requests.post("http://172.25.17.43:1235/process/", files=files, params=params)
+            if response.status_code == 200:
+                improved_image = Image.open(io.BytesIO(response.content))
+            else:
+                st.error("Error processing image.")
+        elif model_select == 'TaDMMUI Model':
+            response = requests.post("http://172.28.23.47:1236/process/", files=files, params=params)
+            if response.status_code == 200:
+                improved_image = Image.open(io.BytesIO(response.content))
+            else:
+                st.error("Error processing image.")
         elif model_select == 'Test':
             improved_image = test_infer(None, image, parameter)
         else:
