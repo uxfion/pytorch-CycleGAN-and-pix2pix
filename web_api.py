@@ -20,25 +20,25 @@ def random_image_from_folder(folder_path):
 st.set_page_config(layout="wide")
 
 # Title of the webpage
-st.title('Image Quality Improvement of Mobile Ultrasound Devices')
+st.title('Medical Image Quality Improvement')
 
 col1, col2 = st.columns(2)
 
 # File uploader allows the user to add their own image
 with col1:
-    uploaded_file = st.file_uploader("Upload Image or DICOM", type=["png", "jpg", "jpeg", "dcm"])
+    uploaded_file = st.file_uploader("Upload Image", type=["png", "jpg", "jpeg"])
 
 # Dropdown for model selection
 with col2:
-    model_select = st.selectbox('Model select', ['Super-Resolution Model', 'FFDNet Model', 'TaDMMUI Model', 'Test'])
+    model_select = st.selectbox('Model select', ['Super Resolution Model', 'General Denosing Model', 'Ultrasound Denosing Model'])
 
 parameter_col, button_col = st.columns(2)
 with parameter_col:
-    if model_select == 'Super-Resolution Model':
+    if model_select == 'Super Resolution Model':
         parameter = st.slider('Select parameter', 1, 14, step=1, value=8)
-    elif model_select == 'FFDNet Model':
-        parameter = st.slider('Select parameter', 0.0, 1.0, step=0.1, value=0.8)
-    elif model_select == 'TaDMMUI Model':
+    elif model_select == 'General Denosing Model':
+        parameter = st.slider('Select parameter', 0.01, 0.1, step=0.01, value=0.06)
+    elif model_select == 'Ultrasound Denosing Model':
         parameter = -1
 with button_col:
     _, demo_col, infer_col, _ = st.columns(4)
@@ -86,28 +86,24 @@ if infer_button:
 
         # print(f"推理模型: {model_select}")
 
-        if model_select == 'Super-Resolution Model':
+        if model_select == 'Super Resolution Model':
             response = requests.post("http://127.0.0.1:1234/process/", files=files, params=params)
             if response.status_code == 200:
                 improved_image = Image.open(io.BytesIO(response.content))
             else:
                 st.error("Error processing image.")
-        elif model_select == 'FFDNet Model':
+        elif model_select == 'General Denosing Model':
             response = requests.post("http://172.25.17.43:1235/process/", files=files, params=params)
             if response.status_code == 200:
                 improved_image = Image.open(io.BytesIO(response.content))
             else:
                 st.error("Error processing image.")
-        elif model_select == 'TaDMMUI Model':
+        elif model_select == 'Ultrasound Denosing Model':
             response = requests.post("http://172.28.23.47:1236/process/", files=files, params=params)
             if response.status_code == 200:
                 improved_image = Image.open(io.BytesIO(response.content))
             else:
                 st.error("Error processing image.")
-        elif model_select == 'Test':
-            improved_image = test_infer(None, image, parameter)
-        else:
-            improved_image = image
 
         print(f"{datetime.datetime.now()} 推理完成\n\n\n")
 
