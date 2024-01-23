@@ -47,20 +47,25 @@ class MyAlignedDataset(BaseDataset):
         # A = AB.crop((0, 0, w2, h))
         # B = AB.crop((w2, 0, w, h))
 
-        n_range = [0, 19]
+        n_diff = random.randint(1, 10)
+        n_A = random.randint(n_diff + 1, 20)
+        n_B = n_A - n_diff
+        # n_range = [0, 19]
 
-        n_A = random.randint(min(n_range[0], n_range[1]), max(n_range[0], n_range[1]))
+        # n_A = random.randint(min(n_range[0], n_range[1]), max(n_range[0], n_range[1]))
         # n_B = random.randint(min(n_range[0], n_range[1]), n_A)
-        # check if the path contains 'ultrasound'
-        if 'ultrasound' in AB_path:
-            # if the image is an ultrasound image, we only blur image A and not image B
-            n_B = 0  # not blurring B for ultrasound images
-        else:
-            # if the image is not an ultrasound image, we blur both image A and image B
-            n_B = random.randint(min(n_range[0], n_range[1]), n_A)
+        # # check if the path contains 'ultrasound'
+        # if 'ultrasound' in AB_path:
+        #     # if the image is an ultrasound image, we only blur image A and not image B
+        #     n_B = 0  # not blurring B for ultrasound images
+        # else:
+        #     # if the image is not an ultrasound image, we blur both image A and image B
+        #     n_B = random.randint(min(n_range[0], n_range[1]), n_A)
 
-        A = AB.filter(ImageFilter.GaussianBlur(radius=n_A))
-        B = AB.filter(ImageFilter.GaussianBlur(radius=n_B))
+        # A = AB.filter(ImageFilter.GaussianBlur(radius=n_A))
+        # B = AB.filter(ImageFilter.GaussianBlur(radius=n_B))
+        A = self.simulate_checkerboarding(AB, n_A)
+        B = self.simulate_checkerboarding(AB, n_B)
 
         # A = self.mapped(B, A)
 
@@ -88,6 +93,14 @@ class MyAlignedDataset(BaseDataset):
     def __len__(self):
         """Return the total number of images in the dataset."""
         return len(self.AB_paths)
+
+    # Function to simulate checkerboarding effect
+    def simulate_checkerboarding(self, image, scale_factor):
+        # Reduce the size of the image by the scale factor
+        small_image = image.resize((image.size[0]//scale_factor, image.size[1]//scale_factor), Image.NEAREST)
+        # Scale it back up to the original size
+        result_image = small_image.resize(image.size, Image.NEAREST)
+        return result_image
 
     def mapped(self, img1, img2):
         # 将 img1 和 img2 分解为三个通道
