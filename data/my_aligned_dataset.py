@@ -72,7 +72,6 @@ class MyAlignedDataset(BaseDataset):
         B = AB
         # B = self.simulate_checkerboarding(AB, n_B)
 
-
         # apply the same transform to both A and B
         transform_params = get_params(self.opt, A.size)
         A_transform = get_transform(self.opt, transform_params, grayscale=(self.input_nc == 1))
@@ -80,7 +79,7 @@ class MyAlignedDataset(BaseDataset):
 
         A = A_transform(A)
         B = B_transform(B)
-        
+
         A_blur = n_A
         # print('A_blur:', A_blur)
         B_blur = n_B
@@ -101,21 +100,16 @@ class MyAlignedDataset(BaseDataset):
     def random_effect(self, image, n):
         choice = random.randint(1, 4)
         if choice == 1:
-            print(f"simulate checkboard {n}")
             return self.simulate_checkerboarding(image, n)
         elif choice == 2:
-            print(f"simulate gaussian {n}")
             return image.filter(ImageFilter.GaussianBlur(radius=n))
         elif choice == 3:
-            print(f"simulate checkboard gaussian {n}")
             image = self.simulate_checkerboarding(image, n)
             return image.filter(ImageFilter.GaussianBlur(radius=n))
         elif choice == 4:
-            print(f"simulate gaussian checkboard {n}")
             image = image.filter(ImageFilter.GaussianBlur(radius=n))
             return self.simulate_checkerboarding(image, n)
         else:
-            print(f"no simulate")
             return image
 
     # Function to simulate checkerboarding effect
