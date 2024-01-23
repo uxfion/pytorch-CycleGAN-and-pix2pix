@@ -47,27 +47,31 @@ class MyAlignedDataset(BaseDataset):
         # A = AB.crop((0, 0, w2, h))
         # B = AB.crop((w2, 0, w, h))
 
-        n_diff = random.randint(1, 10)
-        n_A = random.randint(n_diff + 1, 20)
-        n_B = n_A - n_diff
-        # n_range = [0, 19]
+        # n_diff = random.randint(1, 10)
+        # n_A = random.randint(n_diff + 1, 20)
+        # n_B = n_A - n_diff
 
+        n_A = random.randint(1, 10)
+        n_B = 0
+
+        # n_range = [0, 19]
         # n_A = random.randint(min(n_range[0], n_range[1]), max(n_range[0], n_range[1]))
         # n_B = random.randint(min(n_range[0], n_range[1]), n_A)
         # # check if the path contains 'ultrasound'
         # if 'ultrasound' in AB_path:
-        #     # if the image is an ultrasound image, we only blur image A and not image B
         #     n_B = 0  # not blurring B for ultrasound images
         # else:
+        #     # if the image is an ultrasound image, we only blur image A and not image B
         #     # if the image is not an ultrasound image, we blur both image A and image B
         #     n_B = random.randint(min(n_range[0], n_range[1]), n_A)
 
         # A = AB.filter(ImageFilter.GaussianBlur(radius=n_A))
         # B = AB.filter(ImageFilter.GaussianBlur(radius=n_B))
-        A = self.simulate_checkerboarding(AB, n_A)
-        B = self.simulate_checkerboarding(AB, n_B)
 
-        # A = self.mapped(B, A)
+        A = self.random_effect(AB, n_A)
+        B = AB
+        # B = self.simulate_checkerboarding(AB, n_B)
+
 
         # apply the same transform to both A and B
         transform_params = get_params(self.opt, A.size)
@@ -93,6 +97,26 @@ class MyAlignedDataset(BaseDataset):
     def __len__(self):
         """Return the total number of images in the dataset."""
         return len(self.AB_paths)
+
+    def random_effect(self, image, n):
+        choice = random.randint(1, 4)
+        if choice == 1:
+            print(f"simulate checkboard {n}")
+            return self.simulate_checkerboarding(image, n)
+        elif choice == 2:
+            print(f"simulate gaussian {n}")
+            return image.filter(ImageFilter.GaussianBlur(radius=n))
+        elif choice == 3:
+            print(f"simulate checkboard gaussian {n}")
+            image = self.simulate_checkerboarding(image, n)
+            return image.filter(ImageFilter.GaussianBlur(radius=n))
+        elif choice == 4:
+            print(f"simulate gaussian checkboard {n}")
+            image = image.filter(ImageFilter.GaussianBlur(radius=n))
+            return self.simulate_checkerboarding(image, n)
+        else:
+            print(f"no simulate")
+            return image
 
     # Function to simulate checkerboarding effect
     def simulate_checkerboarding(self, image, scale_factor):
