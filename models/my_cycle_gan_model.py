@@ -6,13 +6,14 @@ from . import networks
 
 import torch.nn as nn
 from torchvision.models import vgg16
+from torchvision.models.vgg import VGG16_Weights
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class PerceptualLoss(nn.Module):
     def __init__(self):
         super(PerceptualLoss, self).__init__()
-        vgg = vgg16(pretrained=True)
+        vgg = vgg16(weights=VGG16_Weights.DEFAULT)
         self.feature_extractor = nn.Sequential(*list(vgg.features)[:23]).to(device)
         for param in self.feature_extractor.parameters():
             param.requires_grad = False
