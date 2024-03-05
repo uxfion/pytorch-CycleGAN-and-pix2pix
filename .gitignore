@@ -1,3 +1,5 @@
+/checkpoints-old/
+/datasets-old/
 .DS_Store
 debug*
 datasets/*

@@ -98,8 +98,8 @@ class MyAlignedDataset(BaseDataset):
         return len(self.AB_paths)
 
     def random_effect(self, image, n):
-        # choice = random.randint(1, 4)
-        choice = 2
+        choice = random.randint(1, 4)
+        # choice = 2
         if choice == 1:
             return self.simulate_checkerboarding(image, n)
         elif choice == 2:
