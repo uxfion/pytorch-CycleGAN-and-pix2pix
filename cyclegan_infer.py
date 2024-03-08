@@ -9,7 +9,7 @@ import os
 from tqdm import tqdm
 
 
-def load_cyclegan_model():
+def load_cyclegan_model(weight_name):
     opt = TestOptions().parse()
     opt.num_threads = 0
     opt.batch_size = 1
@@ -17,8 +17,8 @@ def load_cyclegan_model():
     opt.no_flip = True
     opt.display_id = -1
 
-    opt.dataroot = "./datasets/xijing/low_quality"
-    opt.name = "ultrasound_2023_10_10_batch5"
+    opt.dataroot = "./datasets/xijing/rand_damage_6/"
+    opt.name = weight_name
     opt.gpu_ids = [1]
     opt.model = "my_test"
     opt.no_dropout = True
@@ -97,17 +97,28 @@ if __name__ == '__main__':
     # image_output = cyclegan_infer(model, image_raw, 0)
     # image_output.save("./datasets/xijing/fake/1-LR-0.jpg")
 
-    model = load_cyclegan_model()
-    blur = 8
-    clear = 4
-    input_folder = f'./datasets/xijing/Gaussian_{blur}/high_quality_Gaussian_{blur}'  # 输入文件夹路径
-    output_folder = f'./datasets/xijing/Gaussian_{blur}/1111_fake_Gaussian_{clear}'  # 输出文件夹路径
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
-    files = [f for f in os.listdir(input_folder) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]  # 获取图片文件列表
-    for filename in tqdm(files, desc="Processing Images"):  # 使用tqdm显示进度
-        input_path = os.path.join(input_folder, filename)
-        output_path = os.path.join(output_folder, filename)
-        image_raw = Image.open(input_path).convert("RGB")
-        image_output = cyclegan_infer(model, image_raw, clear)
-        image_output.save(output_path)
+    weight_names = [
+        # "0.效果较好_ultrasound_2023_10_10_batch5",
+        "1.nature_ultrasound",
+        # "2.no_nature",
+        # "3.1_damage",
+        # "4.no_hyper",
+        # "5.no_perceptual",
+        # "6.raw_cyclegan",
+    ]
+
+    for weight in weight_names:
+        model = load_cyclegan_model(weight)
+        blur = 6
+        clear = 10
+        input_folder = f'./datasets/xijing/rand_damage_{blur}'  # 输入文件夹路径
+        output_folder = f'./datasets/xijing/results/rand_damage_{blur}_clear_{clear}_weight_{weight}'  # 输出文件夹路径
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
+        files = [f for f in os.listdir(input_folder) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]  # 获取图片文件列表
+        for filename in tqdm(files, desc="Processing Images"):  # 使用tqdm显示进度
+            input_path = os.path.join(input_folder, filename)
+            output_path = os.path.join(output_folder, filename)
+            image_raw = Image.open(input_path).convert("RGB")
+            image_output = cyclegan_infer(model, image_raw, clear)
+            image_output.save(output_path)
