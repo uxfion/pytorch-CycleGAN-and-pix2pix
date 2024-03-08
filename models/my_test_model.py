@@ -69,15 +69,16 @@ class MyTestModel(BaseModel):
         output = torch.cat((input, add), dim=1)
         return output
 
-    def forward(self, sigma):
+    def forward(self):
         """Run forward pass."""
         # real_ext = self.add_dim(self.real, sigma/50.0)
         # print(f"sigma: {sigma}")
-        target_code = torch.zeros((1, 20))
-        target_code[0, sigma] = 1
-        target_code = target_code.to(self.device)
+        # target_code = torch.zeros((1, 20))
+        # target_code[0, sigma] = 1
+        # target_code = target_code.to(self.device)
         # print(f"target_code: {target_code}")
-        self.fake = self.netG(self.real,target_code)  # G(real)
+        # self.fake = self.netG(self.real,target_code)  # G(real)
+        self.fake = self.netG(self.real)  # G(real)
 
     def optimize_parameters(self):
         """No optimization for test model."""

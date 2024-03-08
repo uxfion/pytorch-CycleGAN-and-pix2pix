@@ -32,7 +32,7 @@ def load_cyclegan_model(weight_name):
 
 
 # Function to perform inference
-def cyclegan_infer(model, image_raw, sigma):
+def cyclegan_infer(model, image_raw):
     # image_raw = crop_to_divisible_by_four(image_raw)
     # Apply necessary transformations
     transform = transforms.Compose([
@@ -44,10 +44,10 @@ def cyclegan_infer(model, image_raw, sigma):
 
     # Perform inference
     with torch.no_grad():
-        target_code = torch.zeros((1, 20))
-        target_code[0, sigma] = 1
-        target_code = target_code.to("cuda:1")
-        fake_image = model.netG(image.to("cuda:1"), target_code)
+        # target_code = torch.zeros((1, 20))
+        # target_code[0, sigma] = 1
+        # target_code = target_code.to("cuda:1")
+        fake_image = model.netG(image.to("cuda:1"))
 
     # Convert to PIL image and return
     fake_image = (fake_image.cpu().squeeze(0) + 1) / 2  # Denormalize
@@ -99,10 +99,10 @@ if __name__ == '__main__':
 
     weight_names = [
         # "0.效果较好_ultrasound_2023_10_10_batch5",
-        "1.nature_ultrasound",
+        # "1.nature_ultrasound",
         # "2.no_nature",
         # "3.1_damage",
-        # "4.no_hyper",
+        "4.no_hyper",
         # "5.no_perceptual",
         # "6.raw_cyclegan",
     ]
@@ -112,7 +112,7 @@ if __name__ == '__main__':
         blur = 6
         clear = 10
         input_folder = f'./datasets/xijing/rand_damage_{blur}'  # 输入文件夹路径
-        output_folder = f'./datasets/xijing/results/rand_damage_{blur}_clear_{clear}_weight_{weight}'  # 输出文件夹路径
+        output_folder = f'./datasets/xijing/results/1/rand_damage_{blur}_clear_{clear}_weight_{weight}'  # 输出文件夹路径
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
         files = [f for f in os.listdir(input_folder) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]  # 获取图片文件列表
@@ -120,5 +120,5 @@ if __name__ == '__main__':
             input_path = os.path.join(input_folder, filename)
             output_path = os.path.join(output_folder, filename)
             image_raw = Image.open(input_path).convert("RGB")
-            image_output = cyclegan_infer(model, image_raw, clear)
+            image_output = cyclegan_infer(model, image_raw)
             image_output.save(output_path)
