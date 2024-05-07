@@ -109,10 +109,10 @@ if __name__ == '__main__':
 
     for weight in weight_names:
         model = load_cyclegan_model(weight)
-        blur = 6
-        clear = 10
-        input_folder = f'./datasets/xijing/rand_damage_{blur}'  # 输入文件夹路径
-        output_folder = f'./datasets/xijing/results/rand_damage_{blur}_clear_{clear}_weight_{weight}'  # 输出文件夹路径
+        blur = 8
+        clear = 6
+        input_folder = f'./datasets/xijing/hr_rand_damage_{blur}'  # 输入文件夹路径
+        output_folder = f'./datasets/xijing/results_hr/with_hyper_{blur}_{clear}/rand_damage_{blur}_clear_{clear}_weight_{weight}'  # 输出文件夹路径
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
         files = [f for f in os.listdir(input_folder) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]  # 获取图片文件列表

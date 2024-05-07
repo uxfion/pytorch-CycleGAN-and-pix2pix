@@ -37,9 +37,9 @@ if __name__ == "__main__":
 
     # random effect on low-reslution directory
     # 源文件夹路径
-    source_dir = './xijing/low_quality/'
+    source_dir = './xijing/high_quality/'
     # 目标文件夹路径
-    target_dir = './xijing/rand_damage_6/'
+    target_dir = './xijing/hr_rand_damage_8/'
 
     # 图片后缀列表（如果有其他格式也可以加入）
     img_exts = ['.jpg', '.png', '.jpeg', '.bmp', '.gif']
@@ -51,5 +51,5 @@ if __name__ == "__main__":
     # 检查文件是否为图片
         if os.path.splitext(filename)[1] in img_exts:
             image = Image.open(os.path.join(source_dir, filename))
-            image = random_effect(image, 6)
+            image = random_effect(image, 8)
             image.save(os.path.join(target_dir, filename))
