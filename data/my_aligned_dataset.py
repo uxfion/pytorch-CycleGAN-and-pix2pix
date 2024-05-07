@@ -51,7 +51,7 @@ class MyAlignedDataset(BaseDataset):
         # n_A = random.randint(n_diff + 1, 20)
         # n_B = n_A - n_diff
 
-        n_A = random.randint(1, 10)
+        n_A = random.randint(1, 19)
         n_B = 0
 
         # n_range = [0, 19]

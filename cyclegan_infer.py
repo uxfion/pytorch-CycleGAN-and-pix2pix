@@ -17,9 +17,9 @@ def load_cyclegan_model(weight_name):
     opt.no_flip = True
     opt.display_id = -1
 
-    opt.dataroot = "./datasets/xijing/rand_damage_6/"
+    opt.dataroot = "./datasets/掌超超分辨数据集/长沙医院/整理过的/长沙配对500对/LR/"
     opt.name = weight_name
-    opt.gpu_ids = [1]
+    opt.gpu_ids = [0]
     opt.model = "my_test"
     opt.no_dropout = True
     opt.preprocess = "none"
@@ -46,8 +46,8 @@ def cyclegan_infer(model, image_raw, sigma):
     with torch.no_grad():
         target_code = torch.zeros((1, 20))
         target_code[0, sigma] = 1
-        target_code = target_code.to("cuda:1")
-        fake_image = model.netG(image.to("cuda:1"), target_code)
+        target_code = target_code.to("cuda:0")
+        fake_image = model.netG(image.to("cuda:0"), target_code)
 
     # Convert to PIL image and return
     fake_image = (fake_image.cpu().squeeze(0) + 1) / 2  # Denormalize

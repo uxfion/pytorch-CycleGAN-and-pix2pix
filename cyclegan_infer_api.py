@@ -8,7 +8,7 @@ import uvicorn
 app = FastAPI()
 
 # 在服务器启动时加载模型
-model = load_cyclegan_model("0.效果较好_ultrasound_2023_10_10_batch5")
+model = load_cyclegan_model("1.nature_ultrasound")
 
 
 @app.post("/process/")
