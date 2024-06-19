@@ -99,20 +99,21 @@ if __name__ == '__main__':
 
     weight_names = [
         # "0.效果较好_ultrasound_2023_10_10_batch5",
-        "1.nature_ultrasound",
+        # "1.nature_ultrasound",
         # "2.no_nature",
         # "3.1_damage",
         # "4.no_hyper",
         # "5.no_perceptual",
         # "6.raw_cyclegan",
+        "7.changsha"
     ]
 
     for weight in weight_names:
         model = load_cyclegan_model(weight)
         blur = 8
-        clear = 6
-        input_folder = f'./datasets/xijing/hr_rand_damage_{blur}'  # 输入文件夹路径
-        output_folder = f'./datasets/xijing/results_hr/with_hyper_{blur}_{clear}/rand_damage_{blur}_clear_{clear}_weight_{weight}'  # 输出文件夹路径
+        clear = 8
+        input_folder = f'./datasets/changsha/changsha_2024_05_14_test_lr_rand_damage_{blur}'  # 输入文件夹路径
+        output_folder = f'./datasets/changsha/results_sr/changsha_{blur}_{clear}/rand_damage_{blur}_clear_{clear}_weight_{weight}'  # 输出文件夹路径
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
         files = [f for f in os.listdir(input_folder) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]  # 获取图片文件列表

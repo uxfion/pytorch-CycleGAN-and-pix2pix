@@ -13,14 +13,15 @@ weight_names = [
     "4.no_hyper",
     "5.no_perceptual",
     "6.raw_cyclegan",
+    "7.changsha",
 ]
 
-blur = 6
-clear = 6
+blur = 8
+clear = 8
 
-for weight_index in [1,2,3,5]:
-    original_dir = './datasets/xijing/low_quality'
-    contrast_dir = f'./datasets/xijing/results/with_hyper_{blur}_{clear}/rand_damage_{blur}_clear_{clear}_weight_{weight_names[weight_index]}'
+for weight_index in [7]:
+    original_dir = './datasets/changsha/changsha_2024_05_14_test_hr'
+    contrast_dir = f'./datasets/changsha/results_sr/changsha_{blur}_{clear}/rand_damage_{blur}_clear_{clear}_weight_{weight_names[weight_index]}'
 
     ssim_values = []
     psnr_values = []
@@ -57,17 +58,18 @@ for weight_index in [1,2,3,5]:
         contrast = np.array(contrast)
 
         # print(f"{file} vs {contrast_file}")
+        print(f"{original_path.replace('./datasets/changsha/changsha_2024_05_14_', '')} vs {contrast_path.replace('./datasets/changsha/results_sr/changsha_8_8/', '').replace('')}")
 
         # 计算SSIM
         ssim_value = compare_ssim(original, contrast, multichannel=True, win_size=3)
         ssim_values.append(ssim_value)
-        # print(f"SSIM: {ssim_value}")
+        print(f"SSIM: {ssim_value}")
 
         # 计算PSNR
         psnr_value = compare_psnr(original, contrast)
         psnr_values.append(psnr_value)
-        # print(f"PSNR: {psnr_value} dB")
-        # print("\n")
+        print(f"PSNR: {psnr_value} dB")
+        print("\n")
 
     mean_ssim = np.mean(ssim_values)
     mean_psnr = np.mean(psnr_values)
