@@ -14,7 +14,7 @@ class PerceptualLoss(nn.Module):
     def __init__(self):
         super(PerceptualLoss, self).__init__()
         vgg = vgg16(weights=VGG16_Weights.DEFAULT)
-        self.feature_extractor = nn.Sequential(*list(vgg.features)[:23]).to(device)
+        self.feature_extractor = nn.Sequential(*list(vgg.features)[:23])
         for param in self.feature_extractor.parameters():
             param.requires_grad = False
 
@@ -113,7 +113,7 @@ class MyCycleGANModel(BaseModel):
             self.criterionCycle = torch.nn.L1Loss()
             self.criterionIdt = torch.nn.L1Loss()
             self.criterionPix2Pix = torch.nn.L1Loss()
-            self.criterionPerceptual = PerceptualLoss()
+            self.criterionPerceptual = PerceptualLoss().to(self.device)
 
             # initialize optimizers; schedulers will be automatically created by function <BaseModel.setup>.
             self.optimizer_G = torch.optim.Adam(itertools.chain(self.netG_A.parameters(), self.netG_B.parameters()), lr=opt.lr, betas=(opt.beta1, 0.999))
@@ -288,8 +288,11 @@ class MyCycleGANModel(BaseModel):
         self.loss_perceptual_A = self.criterionPerceptual(self.fake_B, self.real_B) * 50
         self.loss_perceptual_B = self.criterionPerceptual(self.fake_A, self.real_A) * 50
 
+        # self.loss_G_A_masked = self.criterionGAN_mask(self.netD_A(self.fake_B_masked), True) * 50
+
         # combined loss and calculate gradients
         self.loss_G = self.loss_G_A + self.loss_G_B + self.loss_cycle_A + self.loss_cycle_B + self.loss_idt_A + self.loss_idt_B + self.loss_pix2pix_A + self.loss_pix2pix_B + self.loss_perceptual_A + self.loss_perceptual_B
+        # TODO: 加+ self.loss_G_A_masked
         self.loss_G.backward()
 
     def optimize_parameters(self):
