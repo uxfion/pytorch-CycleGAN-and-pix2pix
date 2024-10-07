@@ -8,7 +8,7 @@ import uvicorn
 app = FastAPI()
 
 # 在服务器启动时加载模型
-model = load_cyclegan_model("7.changsha")
+model = load_cyclegan_model("12.9trans")
 
 
 @app.post("/process/")

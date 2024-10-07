@@ -17,7 +17,8 @@ def load_cyclegan_model(weight_name):
     opt.no_flip = True
     opt.display_id = -1
 
-    opt.dataroot = "./datasets/掌超超分辨数据集/长沙医院/整理过的/长沙配对500对/LR/"
+    # opt.dataroot = "./datasets/掌超超分辨数据集/长沙医院/整理过的/长沙配对500对/LR/"
+    opt.dataroot = "./datasets/all/test/"
     opt.name = weight_name
     opt.gpu_ids = [0]
     opt.model = "my_test"

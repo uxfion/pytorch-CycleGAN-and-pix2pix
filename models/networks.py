@@ -360,7 +360,7 @@ class ResnetGenerator(nn.Module):
         expansion_factor=2.66
 
         mult = 2 ** n_downsampling
-        for i in range(6):
+        for i in range(9):
             model += [TransformerBlock(ngf * mult, num_heads, expansion_factor)]
 
 

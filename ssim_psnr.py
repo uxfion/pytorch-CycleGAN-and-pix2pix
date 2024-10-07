@@ -7,20 +7,22 @@ import numpy as np
 # weight_index = 6
 weight_names = [
     "0.效果较好_ultrasound_2023_10_10_batch5",
-    "1.nature_ultrasound",
-    "2.no_nature",
-    "3.1_damage",
-    "4.no_hyper",
-    "5.no_perceptual",
-    "6.raw_cyclegan",
-    "7.changsha",
+    # "1.nature_ultrasound",
+    # "2.no_nature",
+    # "3.1_damage",
+    # "4.no_hyper",
+    # "5.no_perceptual",
+    # "6.raw_cyclegan",
+    # "7.changsha",
 ]
 
 blur = 8
 clear = 8
 
 for weight_index in [7]:
-    original_dir = './datasets/changsha/changsha_2024_05_14_test_hr'
+    # original_dir = './datasets/changsha/changsha_2024_05_14_test_hr'
+    # contrast_dir = f'./datasets/changsha/results_sr/changsha_{blur}_{clear}/rand_damage_{blur}_clear_{clear}_weight_{weight_names[weight_index]}'
+    original_dir = './results/tim_主观评价/'
     contrast_dir = f'./datasets/changsha/results_sr/changsha_{blur}_{clear}/rand_damage_{blur}_clear_{clear}_weight_{weight_names[weight_index]}'
 
     ssim_values = []

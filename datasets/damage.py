@@ -37,9 +37,9 @@ if __name__ == "__main__":
 
     # random effect on low-reslution directory
     # 源文件夹路径
-    source_dir = './changsha/changsha-2024-05-14-test-hr'
+    source_dir = './all/test'
     # 目标文件夹路径
-    target_dir = './changsha/changsha-2024-05-14-test-lr-rand-damage-8'
+    target_dir = './all/test_degradation8'
 
     # 图片后缀列表（如果有其他格式也可以加入）
     img_exts = ['.jpg', '.png', '.jpeg', '.bmp', '.gif']

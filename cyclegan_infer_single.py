@@ -18,9 +18,9 @@ def load_cyclegan_model():
     opt.display_id = -1
 
     # opt.dataroot = "./datasets/xijing/low_quality"
-    opt.dataroot = "./results/4.test_hyper/origin/"
+    opt.dataroot = "./dataset/all/test"
     # opt.name = "ultrasound_2023_10_10_batch5"
-    opt.name = "1.nature_ultrasound"
+    opt.name = "12.9trans"
     opt.gpu_ids = [1]
     opt.model = "my_test"
     opt.no_dropout = True
@@ -102,10 +102,10 @@ if __name__ == '__main__':
 
     model = load_cyclegan_model()
     blur = 8
-    clear = 8
+    clear = 14
     # input_folder = f'./datasets/xijing/Gaussian_{blur}/high_quality_Gaussian_{blur}'  # 输入文件夹路径
-    input_folder = './results/我的论文比较方法/lr/'  # 输入文件夹路径
-    output_folder = './results/我的论文比较方法/hyper/'  # 输出文件夹路径
+    input_folder = './datasets/all/test_degradation8/'  # 输入文件夹路径
+    output_folder = './results/tim/test_damage_LR_SR'  # 输出文件夹路径
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
     files = [f for f in os.listdir(input_folder) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]  # 获取图片文件列表

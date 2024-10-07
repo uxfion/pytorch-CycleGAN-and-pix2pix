@@ -35,7 +35,7 @@ with col2:
 parameter_col, button_col = st.columns(2)
 with parameter_col:
     if model_select == 'Super Resolution Model':
-        parameter = st.slider('Select parameter', 1, 14, step=1, value=8)
+        parameter = st.slider('Select parameter', 1, 19, step=1, value=8)
     elif model_select == 'General Denosing Model':
         parameter = st.slider('Select parameter', 0.01, 0.1, step=0.01, value=0.06)
     elif model_select == 'Ultrasound Denosing Model':
@@ -48,9 +48,9 @@ with button_col:
         infer_button = st.button('Infer')
 
 if demo_button:
-    demo_file = random_image_from_folder('./datasets/掌超超分辨数据集/长沙医院/整理过的/长沙配对500对/LR/')  # 随机选择图片
+    demo_file = random_image_from_folder('./datasets/all/test')  # 随机选择图片
     st.session_state['demo_image'] = demo_file
-    st.write(f"Pick a random image: {demo_file.replace('掌超超分辨数据集/长沙医院/整理过的/长沙配对500对/', '')}")
+    st.write(f"Pick a random image: {demo_file.replace('xijing_', '')}")
     st.image(demo_file, caption='Random image', width=250)
 
 
