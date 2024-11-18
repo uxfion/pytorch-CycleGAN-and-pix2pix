@@ -341,7 +341,7 @@ class ResnetGenerator(nn.Module):
         else:
             use_bias = norm_layer == nn.InstanceNorm2d
 
-        model = [nn.ReflectionPad2d(3),
+        encoder = [nn.ReflectionPad2d(3),
                  nn.Conv2d(input_nc, ngf, kernel_size=7, padding=0, bias=use_bias),
                  norm_layer(ngf),
                  nn.ReLU(True)]
@@ -349,22 +349,22 @@ class ResnetGenerator(nn.Module):
         n_downsampling = 2
         for i in range(n_downsampling):  # add downsampling layers
             mult = 2 ** i
-            model += [nn.Conv2d(ngf * mult, ngf * mult * 2, kernel_size=3, stride=2, padding=1, bias=use_bias),
+            encoder += [nn.Conv2d(ngf * mult, ngf * mult * 2, kernel_size=3, stride=2, padding=1, bias=use_bias),
                       norm_layer(ngf * mult * 2),
                       nn.ReLU(True)]
 
         # mult = 2 ** n_downsampling
         # for i in range(n_blocks):       # add ResNet blocks
         
-        #     model += [ResnetBlock(ngf * mult, padding_type=padding_type, norm_layer=norm_layer, use_dropout=use_dropout, use_bias=use_bias)]
+        #     encoder += [ResnetBlock(ngf * mult, padding_type=padding_type, norm_layer=norm_layer, use_dropout=use_dropout, use_bias=use_bias)]
+        
+        mult = 2 ** n_downsampling
         num_heads=8
         expansion_factor=2.66
-
-        mult = 2 ** n_downsampling
         for i in range(9):
-            model += [TransformerBlock(ngf * mult, num_heads, expansion_factor)]
+            encoder += [TransformerBlock(ngf * mult, num_heads, expansion_factor)]
 
-        self.encoder = nn.Sequential(*model)
+        self.encoder = nn.Sequential(*encoder)
 
 
         # Vector Quantization layer
@@ -393,6 +393,11 @@ class ResnetGenerator(nn.Module):
         #
         # self.model = nn.Sequential(*model)
 
+        style_dim = 20
+        self.style_fc = nn.Sequential(
+            nn.Linear(style_dim, style_dim),
+            nn.LeakyReLU(0.2, inplace=True),
+        )
 
         
         args = {
@@ -410,24 +415,16 @@ class ResnetGenerator(nn.Module):
         }
         self.decoder = hyperDecoder(args)
 
-        style_dim = args['seq2seq']['c_s']
-        self.style_fc = nn.Sequential(
-            nn.Linear(style_dim, style_dim),
-            nn.LeakyReLU(0.2, inplace=True),
-        )
-
-
-
 
     def forward(self, input, s):
         """Standard forward"""
         # return self.model(input)
         # print(f"ResnetGenerator input shape: {input.shape}")
         # print(f"ResnetGenerator s shape: {s.shape}")
-        output = self.encoder(input)
+        encoded = self.encoder(input)
         # print(f"ResnetGenerator encoder output shape: {output.shape}")
 
-        pre_vq = self.pre_vq(output)
+        pre_vq = self.pre_vq(encoded)
         # print("Pre VQ shape:", pre_vq.shape)
         quantized, vq_loss, _ = self.vq_layer(pre_vq)
         # print("Quantized shape:", quantized.shape)
@@ -437,10 +434,10 @@ class ResnetGenerator(nn.Module):
 
         s = self.style_fc(s)
         # print(f"ResnetGenerator s shape: {s.shape}")
-        ret = self.decoder(post_vq, s)
+        output = self.decoder(post_vq, s)
         # print(f"ResnetGenerator decoder output: {ret.shape}")
         # exit()
-        return ret, vq_loss
+        return output, vq_loss
 
 
 class ResnetBlock(nn.Module):
