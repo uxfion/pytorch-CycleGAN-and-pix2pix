@@ -422,25 +422,25 @@ class ResnetGenerator(nn.Module):
     def forward(self, input, s):
         """Standard forward"""
         # return self.model(input)
-        print(f"ResnetGenerator input shape: {input.shape}")
+        # print(f"ResnetGenerator input shape: {input.shape}")
         # print(f"ResnetGenerator s shape: {s.shape}")
         output = self.encoder(input)
-        print(f"ResnetGenerator encoder output shape: {output.shape}")
+        # print(f"ResnetGenerator encoder output shape: {output.shape}")
 
         pre_vq = self.pre_vq(output)
-        print("Pre VQ shape:", pre_vq.shape)
+        # print("Pre VQ shape:", pre_vq.shape)
         quantized, vq_loss, _ = self.vq_layer(pre_vq)
-        print("Quantized shape:", quantized.shape)
+        # print("Quantized shape:", quantized.shape)
         post_vq = self.post_vq(quantized)
-        print("Post VQ shape:", post_vq.shape)
+        # print("Post VQ shape:", post_vq.shape)
 
 
         s = self.style_fc(s)
         # print(f"ResnetGenerator s shape: {s.shape}")
         ret = self.decoder(post_vq, s)
-        print(f"ResnetGenerator decoder output: {ret.shape}")
+        # print(f"ResnetGenerator decoder output: {ret.shape}")
         # exit()
-        return ret
+        return ret, vq_loss
 
 
 class ResnetBlock(nn.Module):
