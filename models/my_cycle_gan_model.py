@@ -198,10 +198,12 @@ class MyCycleGANModel(BaseModel):
         # self.fake_A = self.netG_B(self.real_B)  # G_B(B)
         # self.rec_B = self.netG_A(self.fake_A)   # G_A(G_B(B))
 
-        self.fake_B = self.netG_A(self.real_A, self.target_code)  # G_A(A)
-        self.rec_A = self.netG_B(self.fake_B, self.target_code)   # G_B(G_A(A))
-        self.fake_A = self.netG_B(self.real_B, self.target_code)  # G_B(B)
-        self.rec_B = self.netG_A(self.fake_A, self.target_code)   # G_A(G_B(B))
+        self.fake_B, self.loss_vq_A = self.netG_A(self.real_A, self.target_code)  # G_A(A)
+        self.rec_A, self.loss_vq_rec_B = self.netG_B(self.fake_B, self.target_code)   # G_B(G_A(A))
+
+
+        self.fake_A, self.loss_vq_B = self.netG_B(self.real_B, self.target_code)  # G_B(B)
+        self.rec_B, self.loss_vq_rec_A = self.netG_A(self.fake_A, self.target_code)   # G_A(G_B(B))
 
         # # print("****input:", self.real_A.shape, '\n', self.real_A)
         # # print("***** self.fake_B = self.netG_A(real_A_ext)")
@@ -256,20 +258,25 @@ class MyCycleGANModel(BaseModel):
         lambda_idt = self.opt.lambda_identity
         lambda_A = self.opt.lambda_A
         lambda_B = self.opt.lambda_B
+
+        lambda_vq = self.opt.lambda_vq if hasattr(self.opt, 'lambda_vq') else 1.0
+
         # Identity loss
         if lambda_idt > 0:
             # G_A should be identity if real_B is fed: ||G_A(B) - B||
             # real_B_idt_ext = self.add_dim(self.real_B, 0.0)
-            self.idt_A = self.netG_A(self.real_B, self.target_code)
+            self.idt_A, self.loss_vq_idt_A = self.netG_A(self.real_B, self.target_code)
             self.loss_idt_A = self.criterionIdt(self.idt_A, self.real_B) * lambda_B * lambda_idt * 0
 
             # G_B should be identity if real_A is fed: ||G_B(A) - A||
             # real_A_idt_ext = self.add_dim(self.real_A, 0.0)
-            self.idt_B = self.netG_B(self.real_A, self.target_code)
+            self.idt_B, self.loss_vq_idt_B = self.netG_B(self.real_A, self.target_code)
             self.loss_idt_B = self.criterionIdt(self.idt_B, self.real_A) * lambda_A * lambda_idt * 0
         else:
             self.loss_idt_A = 0
             self.loss_idt_B = 0
+            self.loss_vq_idt_A = 0
+            self.loss_vq_idt_B = 0
 
         # GAN loss D_A(G_A(A))
         self.loss_G_A = self.criterionGAN(self.netD_A(self.fake_B), True)
@@ -290,8 +297,13 @@ class MyCycleGANModel(BaseModel):
 
         # self.loss_G_A_masked = self.criterionGAN_mask(self.netD_A(self.fake_B_masked), True) * 50
 
+        # Combine all VQ losses
+        self.loss_vq = (self.loss_vq_A + self.loss_vq_B + 
+                        self.loss_vq_rec_A + self.loss_vq_rec_B + 
+                        self.loss_vq_idt_A + self.loss_vq_idt_B) * lambda_vq
+
         # combined loss and calculate gradients
-        self.loss_G = self.loss_G_A + self.loss_G_B + self.loss_cycle_A + self.loss_cycle_B + self.loss_idt_A + self.loss_idt_B + self.loss_pix2pix_A + self.loss_pix2pix_B + self.loss_perceptual_A + self.loss_perceptual_B
+        self.loss_G = self.loss_G_A + self.loss_G_B + self.loss_cycle_A + self.loss_cycle_B + self.loss_idt_A + self.loss_idt_B + self.loss_pix2pix_A + self.loss_pix2pix_B + self.loss_perceptual_A + self.loss_perceptual_B + self.loss_vq
         # TODO: 加+ self.loss_G_A_masked
         self.loss_G.backward()
 

@@ -5,6 +5,7 @@ import functools
 from torch.optim import lr_scheduler
 from .hyper import hyperDecoder
 from .restormer import TransformerBlock
+from .vqvae import VectorQuantizer
 
 
 ###############################################################################
@@ -321,7 +322,7 @@ class ResnetGenerator(nn.Module):
     We adapt Torch code and idea from Justin Johnson's neural style transfer project(https://github.com/jcjohnson/fast-neural-style)
     """
 
-    def __init__(self, input_nc, output_nc, ngf=64, norm_layer=nn.BatchNorm2d, use_dropout=False, n_blocks=6, padding_type='reflect'):
+    def __init__(self, input_nc, output_nc, ngf=64, norm_layer=nn.BatchNorm2d, use_dropout=False, n_blocks=6, padding_type='reflect',num_embeddings=512, embedding_dim=256):
         """Construct a Resnet-based generator
 
         Parameters:
@@ -363,6 +364,19 @@ class ResnetGenerator(nn.Module):
         for i in range(9):
             model += [TransformerBlock(ngf * mult, num_heads, expansion_factor)]
 
+        self.encoder = nn.Sequential(*model)
+
+
+        # Vector Quantization layer
+        self.vq_layer = VectorQuantizer(num_embeddings=num_embeddings, 
+                                      embedding_dim=embedding_dim)
+
+        # Pre-VQ projection
+        self.pre_vq = nn.Conv2d(ngf * mult, embedding_dim, 1)
+
+        # Post-VQ projection
+        self.post_vq = nn.Conv2d(embedding_dim, ngf * mult, 1)
+
 
         # # decoder
         # for i in range(n_downsampling):  # add upsampling layers
@@ -380,7 +394,7 @@ class ResnetGenerator(nn.Module):
         # self.model = nn.Sequential(*model)
 
 
-        self.encoder = nn.Sequential(*model)
+        
         args = {
             'seq2seq': {
                 'ndims': 2,     # 对应 nn.Conv2d
@@ -412,9 +426,15 @@ class ResnetGenerator(nn.Module):
         # print(f"ResnetGenerator s shape: {s.shape}")
         output = self.encoder(input)
         # print(f"ResnetGenerator output shape: {output.shape}")
+
+        pre_vq = self.pre_vq(output)
+        quantized, vq_loss, _ = self.vq_layer(pre_vq)
+        post_vq = self.post_vq(quantized)
+
+
         s = self.style_fc(s)
         # print(f"ResnetGenerator s shape: {s.shape}")
-        ret = self.decoder(output, s)
+        ret = self.decoder(post_vq, s)
         # print(f"ResnetGenerator decoder output: {ret.shape}")
         return ret
 
