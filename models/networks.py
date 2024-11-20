@@ -356,6 +356,8 @@ class ResnetGenerator(nn.Module):
         # for i in range(n_blocks):       # add ResNet blocks
         
         #     model += [ResnetBlock(ngf * mult, padding_type=padding_type, norm_layer=norm_layer, use_dropout=use_dropout, use_bias=use_bias)]
+
+        # restormer
         num_heads=8
         expansion_factor=2.66
 
@@ -364,7 +366,7 @@ class ResnetGenerator(nn.Module):
             model += [TransformerBlock(ngf * mult, num_heads, expansion_factor)]
 
 
-        # # decoder
+        # # 原始decoder
         # for i in range(n_downsampling):  # add upsampling layers
         #     mult = 2 ** (n_downsampling - i)
         #     model += [nn.ConvTranspose2d(ngf * mult, int(ngf * mult / 2),
@@ -407,6 +409,7 @@ class ResnetGenerator(nn.Module):
 
     def forward(self, input, s):
         """Standard forward"""
+        # # 原始
         # return self.model(input)
         # print(f"ResnetGenerator input shape: {input.shape}")
         # print(f"ResnetGenerator s shape: {s.shape}")
