@@ -7,7 +7,7 @@ import glob
 
 blur = 8
 original_dir = './datasets/all/test'
-results_base_dir = './results/xijing/raw'
+results_base_dir = './results/xijing/vq'
 
 # Find all test directories matching the pattern
 test_dirs = glob.glob(f'{results_base_dir}/test_degradation{blur}_sr*')

@@ -77,7 +77,7 @@ class MyTestModel(BaseModel):
         target_code[0, sigma] = 1
         target_code = target_code.to(self.device)
         # print(f"target_code: {target_code}")
-        self.fake = self.netG(self.real,target_code)  # G(real)
+        self.fake, _ = self.netG(self.real,target_code)  # G(real)
 
     def optimize_parameters(self):
         """No optimization for test model."""

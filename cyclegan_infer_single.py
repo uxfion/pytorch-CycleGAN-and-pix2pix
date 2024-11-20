@@ -51,7 +51,7 @@ def cyclegan_infer(model, image_raw, sigma):
         target_code = torch.zeros((1, 20))
         target_code[0, sigma] = 1
         target_code = target_code.to("cuda:1")
-        fake_image = model.netG(image.to("cuda:1"), target_code)
+        fake_image, _ = model.netG(image.to("cuda:1"), target_code)
         # fake_image = model.netG(image.to("cuda:1"))
 
     # Convert to PIL image and return
