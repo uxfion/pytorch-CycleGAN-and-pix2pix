@@ -20,7 +20,9 @@ def load_cyclegan_model():
     # opt.dataroot = "./datasets/xijing/low_quality"
     opt.dataroot = "./dataset/all/test"
     # opt.name = "ultrasound_2023_10_10_batch5"
-    opt.name = "12.9trans"
+    # opt.name = "6.raw_cyclegan"
+    # opt.name = "12.9trans"
+    opt.name = "13.9trans+vq"
     opt.gpu_ids = [1]
     opt.model = "my_test"
     opt.no_dropout = True
@@ -102,16 +104,19 @@ if __name__ == '__main__':
 
     model = load_cyclegan_model()
     blur = 8
-    clear = 14
+    clear = 2
+    clear_list = [2, 4, 6, 8, 10, 12, 14, 16, 18]
     # input_folder = f'./datasets/xijing/Gaussian_{blur}/high_quality_Gaussian_{blur}'  # 输入文件夹路径
     input_folder = './datasets/all/test_degradation8/'  # 输入文件夹路径
-    output_folder = './results/tim/test_damage_LR_SR'  # 输出文件夹路径
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
     files = [f for f in os.listdir(input_folder) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]  # 获取图片文件列表
-    for filename in tqdm(files, desc="Processing Images"):  # 使用tqdm显示进度
-        input_path = os.path.join(input_folder, filename)
-        output_path = os.path.join(output_folder, filename)
-        image_raw = Image.open(input_path).convert("RGB")
-        image_output = cyclegan_infer(model, image_raw, clear)
-        image_output.save(output_path)
+    for clear in clear_list:
+        print(f"\nclear: {clear}")
+        output_folder = f'./results/xijing/vq/test_degradation8_sr{clear}'  # 输出文件夹路径
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
+        for filename in tqdm(files, desc="Processing Images"):  # 使用tqdm显示进度
+            input_path = os.path.join(input_folder, filename)
+            output_path = os.path.join(output_folder, filename)
+            image_raw = Image.open(input_path).convert("RGB")
+            image_output = cyclegan_infer(model, image_raw, clear)
+            image_output.save(output_path)
