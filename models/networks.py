@@ -358,24 +358,24 @@ class ResnetGenerator(nn.Module):
         
         #     encoder += [ResnetBlock(ngf * mult, padding_type=padding_type, norm_layer=norm_layer, use_dropout=use_dropout, use_bias=use_bias)]
         
-        mult = 2 ** n_downsampling
-        num_heads=8
-        expansion_factor=2.66
-        for i in range(9):
-            encoder += [TransformerBlock(ngf * mult, num_heads, expansion_factor)]
+        # mult = 2 ** n_downsampling
+        # num_heads=8
+        # expansion_factor=2.66
+        # for i in range(9):
+        #     encoder += [TransformerBlock(ngf * mult, num_heads, expansion_factor)]
 
         self.encoder = nn.Sequential(*encoder)
 
 
-        # Vector Quantization layer
-        self.vq_layer = VectorQuantizer(num_embeddings=num_embeddings, 
-                                      embedding_dim=embedding_dim)
-
-        # Pre-VQ projection
-        self.pre_vq = nn.Conv2d(ngf * mult, embedding_dim, 1)
-
-        # Post-VQ projection
-        self.post_vq = nn.Conv2d(embedding_dim, ngf * mult, 1)
+        # # Vector Quantization layer
+        # self.vq_layer = VectorQuantizer(num_embeddings=num_embeddings, 
+        #                               embedding_dim=embedding_dim)
+        #
+        # # Pre-VQ projection
+        # self.pre_vq = nn.Conv2d(ngf * mult, embedding_dim, 1)
+        #
+        # # Post-VQ projection
+        # self.post_vq = nn.Conv2d(embedding_dim, ngf * mult, 1)
 
 
         # # 原始decoder
@@ -393,7 +393,7 @@ class ResnetGenerator(nn.Module):
         #
         # self.model = nn.Sequential(*model)
 
-        style_dim = 20
+        style_dim = 4
         self.style_fc = nn.Sequential(
             nn.Linear(style_dim, style_dim),
             nn.LeakyReLU(0.2, inplace=True),
@@ -407,7 +407,7 @@ class ResnetGenerator(nn.Module):
                 'k_dec': [3, 3, 7],  # ksize for decoder
                 's_dec': [1, 1, 1],  # strides for decoder
                 'nres_dec': 9,  # number of resblocks in decoder，这里选择9是因为netG参数是resnet_9blocks
-                'c_s': 20,  # sequence code length
+                'c_s': 4,  # sequence code length
                 'c_w': 20,  # hyperconv weight length
                 'norm': 'InstanceNorm',  # 因为norm参数为instance
                 'c_enc': [64, 128, 256]  # 因为最后一个256需要和encoder/resnet的输出一致
@@ -425,20 +425,21 @@ class ResnetGenerator(nn.Module):
         encoded = self.encoder(input)
         # print(f"ResnetGenerator encoder output shape: {output.shape}")
 
-        pre_vq = self.pre_vq(encoded)
-        # print("Pre VQ shape:", pre_vq.shape)
-        quantized, vq_loss, _ = self.vq_layer(pre_vq)
-        # print("Quantized shape:", quantized.shape)
-        post_vq = self.post_vq(quantized)
-        # print("Post VQ shape:", post_vq.shape)
+        # pre_vq = self.pre_vq(encoded)
+        # # print("Pre VQ shape:", pre_vq.shape)
+        # quantized, vq_loss, _ = self.vq_layer(pre_vq)
+        # # print("Quantized shape:", quantized.shape)
+        # post_vq = self.post_vq(quantized)
+        # # print("Post VQ shape:", post_vq.shape)
 
 
         s = self.style_fc(s)
         # print(f"ResnetGenerator s shape: {s.shape}")
-        output = self.decoder(post_vq, s)
+        # output = self.decoder(post_vq, s)
+        output = self.decoder(encoded, s)
         # print(f"ResnetGenerator decoder output: {ret.shape}")
         # exit()
-        return output, vq_loss
+        return output#, vq_loss
 
 
 class ResnetBlock(nn.Module):

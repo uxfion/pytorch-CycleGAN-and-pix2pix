@@ -155,10 +155,10 @@ class hyperDecoder(nn.Module):
 
         c_pre = args['seq2seq']['c_enc'][-1]
         self.res = nn.ModuleList()
-        # for _ in range(self.nres_dec):
-        #     self.res.append(
-        #         hyperResnetBlock(self.style_dim, c_pre, padding_type='reflect', norm_layer=self.norm, use_bias=True,
-        #                          weight_dim=self.weight_dim, ndims=self.ndims))
+        for _ in range(self.nres_dec):
+            self.res.append(
+                hyperResnetBlock(self.style_dim, c_pre, padding_type='reflect', norm_layer=self.norm, use_bias=True,
+                                 weight_dim=self.weight_dim, ndims=self.ndims))
 
         self.up = nn.Upsample(scale_factor=2, mode='bilinear' if self.ndims == 2 else 'trilinear')
 

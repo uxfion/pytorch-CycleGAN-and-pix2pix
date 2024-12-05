@@ -21,8 +21,8 @@ def load_cyclegan_model():
     opt.dataroot = "./dataset/all/test"
     # opt.name = "ultrasound_2023_10_10_batch5"
     # opt.name = "6.raw_cyclegan"
-    # opt.name = "12.9trans"
-    opt.name = "13.9trans+vq"
+    opt.name = "12.9trans"
+    # opt.name = "13.9trans+vq"
     opt.gpu_ids = [1]
     opt.model = "my_test"
     opt.no_dropout = True
@@ -51,7 +51,7 @@ def cyclegan_infer(model, image_raw, sigma):
         target_code = torch.zeros((1, 20))
         target_code[0, sigma] = 1
         target_code = target_code.to("cuda:1")
-        fake_image, _ = model.netG(image.to("cuda:1"), target_code)
+        fake_image = model.netG(image.to("cuda:1"), target_code)
         # fake_image = model.netG(image.to("cuda:1"))
 
     # Convert to PIL image and return
@@ -107,11 +107,11 @@ if __name__ == '__main__':
     clear = 2
     clear_list = [2, 4, 6, 8, 10, 12, 14, 16, 18]
     # input_folder = f'./datasets/xijing/Gaussian_{blur}/high_quality_Gaussian_{blur}'  # 输入文件夹路径
-    input_folder = './datasets/all/test_degradation8/'  # 输入文件夹路径
+    input_folder = './datasets/all/test/'  # 输入文件夹路径
     files = [f for f in os.listdir(input_folder) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]  # 获取图片文件列表
     for clear in clear_list:
         print(f"\nclear: {clear}")
-        output_folder = f'./results/xijing/vq/test_degradation8_sr{clear}'  # 输出文件夹路径
+        output_folder = f'./results/cs/9restormer/test_cs_HR_no_deg_sr{clear}'  # 输出文件夹路径
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
         for filename in tqdm(files, desc="Processing Images"):  # 使用tqdm显示进度
