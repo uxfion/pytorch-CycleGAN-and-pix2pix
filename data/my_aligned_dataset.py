@@ -30,7 +30,7 @@ class ImageDegradation:
             # 噪声效果
             lambda: self.add_gaussian_noise(image, params['noise_factor']),
             lambda: self.add_speckle_noise(image, params['speckle_factor']),
-            lambda: self.add_salt_pepper_noise(image, params['noise_factor']),
+            # lambda: self.add_salt_pepper_noise(image, params['noise_factor']),
             
             # 模糊效果
             lambda: image.filter(ImageFilter.GaussianBlur(radius=params['gaussian_blur_radius'])),
@@ -48,32 +48,32 @@ class ImageDegradation:
     def _get_params_from_n(self, n):
         """根据n值(1-3)返回相应的参数"""
         params = {
-            1: {  # 轻度降质
-                'resize_ratio': 0.75,
-                'gaussian_blur_radius': 1.5,
-                'motion_blur_size': 3,
-                'noise_factor': 0.1,
-                'speckle_factor': 0.15,
-                'contrast_factor': 0.85,
-                'brightness_factor': 0.9,
+            1: {  # 中度降质
+                'resize_ratio': 0.5,  # 原来是0.75
+                'gaussian_blur_radius': 2.5,  # 原来是1.5
+                'motion_blur_size': 5,  # 原来是3
+                'noise_factor': 0.2,  # 原来是0.1
+                'speckle_factor': 0.25,  # 原来是0.15
+                'contrast_factor': 0.7,  # 原来是0.85
+                'brightness_factor': 0.8,  # 原来是0.9
             },
-            2: {  # 中度降质
-                'resize_ratio': 0.5,
-                'gaussian_blur_radius': 2.5,
-                'motion_blur_size': 5,
-                'noise_factor': 0.2,
-                'speckle_factor': 0.25,
-                'contrast_factor': 0.7,
-                'brightness_factor': 0.8,
+            2: {  # 重度降质
+                'resize_ratio': 0.25,  # 原来是0.5
+                'gaussian_blur_radius': 3.5,  # 原来是2.5
+                'motion_blur_size': 7,  # 原来是5
+                'noise_factor': 0.3,  # 原来是0.2
+                'speckle_factor': 0.35,  # 原来是0.25
+                'contrast_factor': 0.5,  # 原来是0.7
+                'brightness_factor': 0.7,  # 原来是0.8
             },
-            3: {  # 重度降质
-                'resize_ratio': 0.25,
-                'gaussian_blur_radius': 3.5,
-                'motion_blur_size': 7,
-                'noise_factor': 0.3,
-                'speckle_factor': 0.35,
-                'contrast_factor': 0.5,
-                'brightness_factor': 0.7,
+            3: {  # 极重度降质
+                'resize_ratio': 0.125,  # 原来是0.25
+                'gaussian_blur_radius': 5.0,  # 原来是3.5
+                'motion_blur_size': 9,  # 原来是7
+                'noise_factor': 0.4,  # 原来是0.3
+                'speckle_factor': 0.45,  # 原来是0.35
+                'contrast_factor': 0.3,  # 原来是0.5
+                'brightness_factor': 0.6,  # 原来是0.7
             }
         }
         return params.get(n, params[2])  # 默认返回中度降质参数
